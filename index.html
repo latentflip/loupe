@@ -1,8 +1,9 @@
 <script type='bootstrap' id='bootstrap'>
+console.log('TIMER STUFF');
+console.log(this.setTimeout);
 var _timerId = 0;
-console.log('TIMEOUT' + setTimeout);
-var _setTimeout = this.setTimeout;
-var setTimeout = function (cb, time) {
+var _setTimeout = setTimeout;
+self.setTimeout = function (cb, time) {
   _timerId++;
   postMessage("timer:queued:" + _timerId);
   _setTimeout(function () {
