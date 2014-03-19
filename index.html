@@ -5,12 +5,14 @@ var _timerId = 0;
 var _setTimeout = setTimeout;
 self.setTimeout = function (cb, time) {
   _timerId++;
-  postMessage("timer:queued:" + _timerId);
-  _setTimeout(function () {
-    postMessage("timer:processing:" + _timerId);
-    cb();
-    postMessage("timer:processed:" + _timerId);
-  }, time);
+  (function (id) {
+    postMessage("timer:queued:" + id);
+    _setTimeout(function () {
+      postMessage("timer:processing:" + id);
+      cb();
+      postMessage("timer:processed:" + id);
+    }, time);
+  })(_timerId);
 };
 
 var $ = function (sel) {
@@ -31,7 +33,15 @@ var $ = function (sel) {
 <pre id=code>
 
 setTimeout(function () {
-  console.log('Queued');
+  console.log('Queued function run');
+}, 10000);
+
+setTimeout(function () {
+  console.log('Queued function run');
+}, 1001);
+
+setTimeout(function () {
+  console.log('Queued function run');
 }, 1000);
 
 
@@ -55,6 +65,7 @@ console.log('3');
 </pre>
 <code>
 <button>go!</button>
+<ul id='timer-queue'></ul>
 
 <div id='colored'>
 

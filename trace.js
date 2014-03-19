@@ -5,7 +5,7 @@ var colors = require('./colseq').createSequence();
 var topre = require('./topre');
 
 var LOOP_DELAY = 1000000;
-var TARGET_LOOP_DELAY = 500;
+var TARGET_LOOP_DELAY = 250;
 
 (function () {
     var a = new Date().getTime();
@@ -145,8 +145,28 @@ function colorCode (code, ast) {
             var action = msg[0];
             var id = msg[1];
             var el = document.querySelector('#expr-' + id);
-            if (action === 'on') el.style.background = el.getAttribute('data-color');
-            else el.style.background = '';
+            if (action === 'on') {
+                el.style.background = el.getAttribute('data-color');
+            } else if (action === 'off') {
+                el.style.background = '';
+            } else if (action === 'timer') {
+                var queue = document.getElementById('timer-queue');
+                id = msg[2];
+                console.log(msg);
+                if (msg[1] === 'queued') {
+                    el = document.createElement('li');
+                    el.setAttribute('id', 'timer-' + msg[2]);
+                    el.innerText = "Timer: " + msg[2];
+                    queue.appendChild(el);
+                } else if (msg[1] === 'processing') {
+                    el = document.getElementById('timer-' + msg[2]);
+                    el.style.background = 'coral';
+                } else if (msg[1] === 'processed') {
+                    el = document.getElementById('timer-' + msg[2]);
+                    console.log('Processed', msg[2]);
+                    el.parentNode.removeChild(el);
+                }
+            }
         };
 
         document.querySelector('button').addEventListener('click', function () {
