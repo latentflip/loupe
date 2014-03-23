@@ -1,0 +1,40 @@
+html, body {
+  min-height: 100%;
+}
+
+#timer-queue {
+  width: 100px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+#timer-queue li {
+  background: gray;
+  padding: 20px
+}
+
+.editor {
+  height: 80%;
+  width: 50%;
+  border: 1px gray solid;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 10px;
+  margin: 10px;
+  display: inline-block;
+  white-space: pre;
+}
+
+.code-node {
+}
+
+.code-node.running {
+  background: red;
+}
+
+.code-node:not(.running) {
+  background: none
+  transition: background 0.25s linear;
+  -webkit-transition: background 0.25s linear;
+}

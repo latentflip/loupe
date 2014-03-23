@@ -14,7 +14,6 @@ var instrumentCode = require('./instrument-code');
 var wrapInsertionPoints = require('./wrap-insertion-points');
 
 var updateTimerQueue = function (timers) {
-    console.log(timers);
     var timerSelectors = timers.map(function (timer) {
         return {
             '[role=state]' : timer.state,
