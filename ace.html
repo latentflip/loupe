@@ -1,0 +1,71 @@
+<div id='javascript-editor' contenteditable='true'>
+setTimeout(function () {
+  console.log('Queued function run');
+}, 10000);
+
+setTimeout(function () {
+  console.log('Queued function run');
+}, 1001);
+
+setTimeout(function () {
+  console.log('Queued function run');
+}, 1000);
+
+function onEach (el) {
+  console.log(el);
+}
+
+function a (array) {
+  array.forEach(onEach);
+}
+
+a([1,2,3]);
+console.log('2');
+console.log('3');
+</div>
+
+<div id='timer-queue' role='timer-queue'></div>
+
+<style>
+  html, body {
+    min-height: 100%;
+  }
+
+  #timer-queue {
+    width: 100px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+  }
+  #timer-queue li {
+    background: gray;
+    padding: 20px
+  }
+
+  #javascript-editor {
+    height: 80%;
+    width: 50%;
+    border: 1px gray solid;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 10px;
+    margin: 10px;
+    display: inline-block;
+    white-space: pre;
+  }
+
+  .code-node {
+  }
+
+  .code-node.running {
+    background: red;
+  }
+
+  .code-node:not(.running) {
+    background: none
+    transition: background 0.25s linear;
+    -webkit-transition: background 0.25s linear;
+  }
+</style>
+<script src='app.js'></script>
