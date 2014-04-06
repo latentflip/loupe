@@ -14,23 +14,18 @@ var cleanupCode = function (code) {
 };
 
 var instrumentAndWrapHTML = function (code) {
-    console.log(code);
     var instrumented = instrumentCode(code, {
         before: function (id, node) {
-            return deval(function (id) {
-                weevil.send('node:before', { id: $id$ });
-                delay();
-            }, id);
+            return deval(function (id, type, source) {
+                weevil.send('node:before', { id: $id$, type: "$type$", source: $source$ }), delay()
+            }, id, node.type, JSON.stringify(node.source()));
         },
         after: function (id, node) {
             return deval(function (id) {
-                weevil.send('node:after', { id: $id$ });
-                delay();
+                weevil.send('node:after', { id: $id$ }), delay()
             }, id);
         }
     });
-
-    console.log(instrumented);
 
     var html = wrapInsertionPoints(code, instrumented.insertionPoints, {
         before: function (id) {
@@ -84,13 +79,14 @@ var makeWorkerCode = function (code) {
         };
 
         $code$;
-        
+
     }, delay.toString(), code);
 };
 
 module.exports = AndView.extend({
     initialize: function (options) {
         this.timeouts = options.timeouts;
+        this.stackFrames = options.stackFrames;
     },
     events: {
         'focusout [role=editor]' : 'runCode',
@@ -100,6 +96,7 @@ module.exports = AndView.extend({
     render: function () {
         this.renderAndBind();
         this.editor = this.get('[role=editor]') || this.el;
+        this.runCode();
         return this;
     },
     log: console.log.bind(console, 'log'),
@@ -123,10 +120,12 @@ module.exports = AndView.extend({
         this.worker = weevil(workerCode);
         this.worker
                 .on('node:before', function (node) {
-                    $('#node-' + node.id).addClass('running');  
+                    console.log('ON: ', node);
+                    $('#node-' + node.id).addClass('running');
                 })
                 .on('node:after', function (node) {
-                    $('#node-' + node.id).removeClass('running');  
+                    console.log('OFF: ', node);
+                    $('#node-' + node.id).removeClass('running');
                 });
 
         this.worker
@@ -139,5 +138,20 @@ module.exports = AndView.extend({
                 .on('timeout:finished', function (timer) {
                     self.timeouts.add(timer, { merge: true });
                 });
+
+        this.worker
+                .on('node:before', function (node) {
+                    node.nodeId = node.id;
+                    delete node.id;
+                    self.stackFrames.add(node, { merge: true });
+                })
+                .on('node:after', function (node) {
+                    var found = self.stackFrames.find(function (n) {
+                        console.log("N:", n.nodeId, node.id);
+                        return n.nodeId === node.id;
+                    });
+                    self.stackFrames.remove(found);
+                });
+
     }
 });

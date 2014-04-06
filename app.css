@@ -30,7 +30,7 @@ html, body {
 }
 
 .code-node.running {
-  background: red;
+  background: rgba(255,0,0,0.5);
 }
 
 .code-node:not(.running) {

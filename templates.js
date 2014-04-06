@@ -11,6 +11,18 @@ exports.timeoutList = multiline(function () {/*
     <ul></ul>
 */});
 
+exports.stackFrame = multiline(function () {/*
+    <li>
+        <span role=source></span>
+        <span role=type></span>
+        <span role=id></span>
+    </li>
+*/});
+
+exports.stackFrameList = multiline(function () {/*
+    <ul></ul>
+*/});
+
 exports.mainView = multiline(function () {/*
     <div>
         <div role=stack></div>
@@ -23,29 +35,31 @@ exports.mainView = multiline(function () {/*
 exports.code = multiline(function () {/*
 <div>
     <div role='editor' class='editor' contenteditable='true'>
-    setTimeout(function () {
-      console.log('Queued function run');
-    }, 10000);
-
-    setTimeout(function () {
-      console.log('Queued function run');
-    }, 1001);
-
-    setTimeout(function () {
-      console.log('Queued function run');
-    }, 1000);
-
-    function onEach (el) {
-      console.log(el);
-    }
-
-    function a (array) {
-      array.forEach(onEach);
-    }
-
-    a([1,2,3]);
-    console.log('2');
-    console.log('3');
+console.log(console.log('hi' + 2));
+var a = console.log('hi');
+[1,2,3].map(function (a) {
+    console.log(a * 2);
+});
+console.log(a + a + a);
+var b = 2 + 2 + 2;
     </div>
+</div>
+*/});
+
+exports.code = multiline(function () {/*
+<div>
+<div role='editor' class='editor' contenteditable='true'>
+var bar = function () {
+    return 5 * 10;
+};
+
+var foo = function () {
+    return bar() * 2;   
+};
+
+setTimeout(function () {
+    console.log(foo());
+}, 1000);
+</div>
 </div>
 */});

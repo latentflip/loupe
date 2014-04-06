@@ -1,5 +1,4 @@
-var Collection = require('ampersand-collection')
-                    .extend(require('ampersand-collection-underscore-mixin'));
+var Collection = require('./base-collection');
 
 var Timeout = require('./timeout');
 
