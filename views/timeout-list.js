@@ -5,10 +5,18 @@ var TimeoutItem = AndView.extend({
     template: templates.timeoutItem,
     bindings: {
         id: '[role=id]',
-        state: '[role=state]',
+        state: [
+            ['[role=state]', 'text'],
+            ['li', 'class']
+        ]
     },
     render: function () {
         this.renderAndBind();
+        var self = this;
+        this.listenTo(this.model, 'change:state', function () {
+            this.el.setAttribute('class', self.model.state);
+        });
+        this.el.setAttribute('class', self.model.state);
         return this;
     }
 });

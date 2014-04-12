@@ -50,7 +50,7 @@ var makeWorkerCode = function (code) {
     return deval(function (delayMaker, code) {
         var delayMaker = $delayMaker$;
 
-        var delay = delayMaker(500);
+        var delay = delayMaker(750);
 
         //Override setTimeout
         var _setTimeout = self.setTimeout;
@@ -96,15 +96,16 @@ module.exports = AndView.extend({
     render: function () {
         this.renderAndBind();
         this.editor = this.get('[role=editor]') || this.el;
-        this.runCode();
+        //this.runCode();
         return this;
     },
     log: console.log.bind(console, 'log'),
     editCode: function (e) {
-        console.log('Edit code');
-
         if (this.rawCode) $(this.$editor).html(this.rawCode);
         if (this.worker) this.worker.kill();
+
+        this.timeouts.each(function (t) { t.remove(); });
+        this.stack.each(function (t) { t.remove(); });
     },
     runCode: function (e) {
         this.rawCode = $(this.editor).text().trim();
@@ -143,6 +144,7 @@ module.exports = AndView.extend({
                 .on('node:before', function (node) {
                     node.nodeId = node.id;
                     delete node.id;
+                    node.source = $('#node-' + node.nodeId).text();
                     self.stackFrames.add(node, { merge: true });
                 })
                 .on('node:after', function (node) {

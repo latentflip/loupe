@@ -14,8 +14,6 @@ exports.timeoutList = multiline(function () {/*
 exports.stackFrame = multiline(function () {/*
     <li>
         <span role=source></span>
-        <span role=type></span>
-        <span role=id></span>
     </li>
 */});
 
@@ -54,12 +52,16 @@ var bar = function () {
 };
 
 var foo = function () {
-    return bar() * 2;   
+    return bar() * 2;
 };
 
 setTimeout(function () {
     console.log(foo());
 }, 1000);
+
+setTimeout(function () {
+    console.log(foo());
+}, 20000);
 </div>
 </div>
 */});

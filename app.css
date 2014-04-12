@@ -1,5 +1,7 @@
 html, body {
   min-height: 100%;
+  font-family: helvetica;
+  font-size: 18px;
 }
 
 #timer-queue {
@@ -14,8 +16,8 @@ html, body {
 }
 
 .editor {
-  height: 80%;
-  width: 50%;
+  height: 100%;
+  width: 100%;
   border: 1px gray solid;
   font-family: monospace;
   font-size: 12px;
@@ -37,4 +39,77 @@ html, body {
   background: none
   transition: background 0.25s linear;
   -webkit-transition: background 0.25s linear;
+}
+
+[role=code] {
+  width: 50%;
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 75%;
+}
+
+[role=stack] {
+  width: 50%;
+  position: absolute;
+  top: 0;
+  left: 0%;
+  height: 75%;
+}
+
+[role=stack] ul {
+  position: absolute;
+  bottom: 0;
+}
+
+[role=timeouts] {
+  width: 100%;
+  position: absolute;
+  top: 75%;
+  left: 0;
+  height: 12.5%;
+}
+
+[role=timeouts]:before {
+  content: "Timeouts:";
+  opacity: 0.5;
+  padding: 5px;
+  margin: 5px;
+  background: gray;
+  color: white;
+}
+
+[role=stack]:before {
+  content: "Timeouts:";
+  opacity: 0.5;
+  padding: 5px;
+  margin: 5px;
+  background: gray;
+  color: white;
+}
+
+[role=timeouts] li {
+  background: coral;
+  padding: 20px;
+  margin: 5px;
+  list-style-type: none;
+  display: inline-block;
+}
+
+[role=timeouts] li.started {
+  background: lime;
+}
+
+[role=timeouts] li.finished {
+  background: lime;
+  opacity: 0.25;
+}
+
+
+[role=callbacks] {
+  width: 100%;
+  position: absolute;
+  top: 87.5%;
+  left: 0;
+  height: 12.5%;
 }
