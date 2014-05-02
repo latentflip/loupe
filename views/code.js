@@ -96,18 +96,19 @@ module.exports = AndView.extend({
     render: function () {
         this.renderAndBind();
         this.editor = this.get('[role=editor]') || this.el;
-        //this.runCode();
         return this;
     },
     log: console.log.bind(console, 'log'),
     editCode: function (e) {
+        console.log('EDIT');
         if (this.rawCode) $(this.$editor).html(this.rawCode);
         if (this.worker) this.worker.kill();
 
-        this.timeouts.each(function (t) { t.remove(); });
-        this.stack.each(function (t) { t.remove(); });
+        this.timeouts.reset();
+        this.stackFrames.reset();
     },
     runCode: function (e) {
+        console.log('RUN');
         this.rawCode = $(this.editor).text().trim();
         var code = cleanupCode(this.rawCode);
         this.instrumentAndRun(code);

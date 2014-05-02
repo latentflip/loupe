@@ -1,6 +1,10 @@
+*, *:before, *:after {
+  -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+}
+
 html, body {
   min-height: 100%;
-  font-family: helvetica;
+  font-family: courier;
   font-size: 18px;
 }
 
@@ -50,16 +54,28 @@ html, body {
 }
 
 [role=stack] {
-  width: 50%;
+  width: 25%;
   position: absolute;
   top: 0;
   left: 0%;
   height: 75%;
+  border: 1px gray solid;
 }
 
 [role=stack] ul {
   position: absolute;
   bottom: 0;
+  list-style-type: none;
+  padding: 0;
+  width: 100%;
+  margin: 0;
+}
+
+[role=stack] ul li {
+  padding: 10px;
+  background: #F0E03F;
+  margin: 10px;
+  width: calc(100% - 20px);
 }
 
 [role=timeouts] {
@@ -80,7 +96,7 @@ html, body {
 }
 
 [role=stack]:before {
-  content: "Timeouts:";
+  content: "Stack";
   opacity: 0.5;
   padding: 5px;
   margin: 5px;

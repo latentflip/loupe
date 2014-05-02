@@ -1,34 +1,51 @@
-var $ = function (sel) {
-  return {
-    on: function (event, cb) {
-      addEventListener('onmessage', function (e) {
-        var data = e.data;
-        if (e.data.sel === sel && e.data.event === event) {
-          cb(e.data.eventData);
-        }
-      });
-    }
-  };
+var wrapAddEventListener = function (options) {
+    var noop = function () {};
+    var onBound = options.onBound || noop;
+    var onRun = options.onRun || noop;
+    var onDone = options.onDone || noop;
+
+    var bound = {};
+
+    var _addEventListener = EventTarget.prototype.addEventListener;
+    var _removeEventListener = EventTarget.prototype.removeEventListener;
+    EventTarget.prototype.addEventListener = function (event, fn, useCapture) {
+        onBound.apply(onBound, arguments);
+
+        var callback = function () {
+            onRun.apply(onRun, arguments);
+            fn.apply(this, arguments);
+            onDone.apply(onDone, arguments);
+        };
+        bound[fn] = callback;
+        _addEventListener.call(this, event, callback, useCapture);
+    };
+
+    EventTarget.prototype.removeEventListener = function (event, fn, useCapture) {
+        _removeEventListener.call(this, event, bound[fn], useCapture);
+    };
 };
 
 
-$('button').on('click', function () {
-    console.log('Hello');
+wrapAddEventListener({
+    onBound: function () {
+        console.log('Being bound', arguments);
+    },
+    onRun: function () {
+        console.log('Being run', arguments);
+    }
 });
 
-[].forEach(function () {
-  console.log('hi');
-});
 
-function onEach (el) {
-  console.log(el);
-}
+var $ = require('jquery');
+var n = 0;
 
-function a (array) {
-  console.log('Listing array');
-  array.forEach(onEach);
-}
-console.log('2');
-console.log('3');
+var b = function () {
+    console.log('hi');
+    n++;
+    if (n === 5) {
+        console.log('Unbind');
+        $('div').off('click', b);
+    }
+};
 
-a(1,2,3]);
+$('div').on('click', b);
