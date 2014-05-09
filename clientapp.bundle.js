@@ -26867,6 +26867,8 @@ function bar () {
 function foo () {
     bar();
 }
+
+
 setTimeout(function () {
     foo();
 }, 1);
