@@ -46,17 +46,25 @@ var b = 2 + 2 + 2;
 
 exports.code = multiline(function () {/*
 <div>
-<div role='editor' class='editor' contenteditable='true'>
+<div role='editor' class='editor' contenteditable='true'>function baz () {
+    console.log('bar');
+}
+function bar () {
+    baz();
+}
+function foo () {
+    bar();
+}
 setTimeout(function () {
-    console.log(1);
+    foo();
 }, 1);
 
 setTimeout(function () {
-    console.log(2);
+    foo();
 }, 2);
 
 setTimeout(function () {
-    console.log(3);
+    foo();
 }, 3);
 </div>
 </div>
