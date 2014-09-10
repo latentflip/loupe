@@ -60,7 +60,7 @@ var makeWorkerCode = function (code) {
             var timerId;
 
             var queued = +new Date();
-            var data = { id: timerId, delay: delay, queued: +new Date(), state: 'queued' };
+            var data = { id: timerId, delay: delay, created: +new Date(), state: 'timing' };
             args.unshift(function () {
                 data.state = 'started';
                 data.started = +new Date();
@@ -75,7 +75,7 @@ var makeWorkerCode = function (code) {
             });
 
             data.id = _setTimeout.apply(self, args);
-            weevil.send('timeout:queued', data);
+            weevil.send('timeout:created', data);
         };
 
         $code$;
@@ -85,17 +85,18 @@ var makeWorkerCode = function (code) {
 
 module.exports = AndView.extend({
     initialize: function (options) {
+        window.codeView = this;
         this.timeouts = options.timeouts;
         this.stackFrames = options.stackFrames;
     },
     events: {
-        'focusout [role=editor]' : 'runCode',
-        'focusin [role=editor]' : 'editCode'
+        'focusout [data-hook=editor]' : 'runCode',
+        'focusin [data-hook=editor]' : 'editCode'
     },
     template: templates.code,
     render: function () {
-        this.renderAndBind();
-        this.editor = this.get('[role=editor]') || this.el;
+        this.renderWithTemplate();
+        this.editor = this.queryByHook('editor') || this.el;
         return this;
     },
     log: console.log.bind(console, 'log'),
@@ -122,16 +123,14 @@ module.exports = AndView.extend({
         this.worker = weevil(workerCode);
         this.worker
                 .on('node:before', function (node) {
-                    console.log('ON: ', node);
                     $('#node-' + node.id).addClass('running');
                 })
                 .on('node:after', function (node) {
-                    console.log('OFF: ', node);
                     $('#node-' + node.id).removeClass('running');
                 });
 
         this.worker
-                .on('timeout:queued', function (timer) {
+                .on('timeout:created', function (timer) {
                     self.timeouts.add(timer, { merge: true });
                 })
                 .on('timeout:started', function (timer) {

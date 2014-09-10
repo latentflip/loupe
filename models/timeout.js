@@ -5,8 +5,18 @@ module.exports = AndModel.extend({
     props: {
         id: 'number',
         state: 'string',
-        queuedAt: ['date'],
-        startedAt: ['date'],
-        finishedAt: ['date']
+        delay: 'number',
+        created: ['date'],
+        queued: ['date'],
+        started: ['date'],
+        finished: ['date']
+    },
+    initialize: function () {
+        if (this.delay && this.created) {
+            setTimeout(function () {
+                this.state = 'queued';
+                this.queued = +new Date();
+            }.bind(this), this.delay);
+        }
     }
 });

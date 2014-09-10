@@ -4,20 +4,16 @@ var templates = require('../templates');
 var StackFrame = AndView.extend({
     template: templates.stackFrame,
     bindings: {
-        id: '[role=id]',
-        type: '[role=type]',
-        source: '[role=source]',
-    },
-    render: function () {
-        this.renderAndBind();
-        return this;
+        'model.id': '[data-hook=id]',
+        'model.type': '[data-hook=type]',
+        'model.source': '[data-hook=source]',
     }
 });
 
 var StackFrameList = AndView.extend({
     template: templates.stackFrameList,
     render: function () {
-        this.renderAndBind({});
+        this.renderWithTemplate();
         this.renderCollection(this.collection, StackFrame, this.el);
         return this;
     }

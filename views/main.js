@@ -16,15 +16,15 @@ module.exports = AndView.extend({
         this.stackFrames = new StackFrames();
     },
     render: function () {
-        this.renderAndBind();
+        this.renderWithTemplate();
 
         var timeoutsView = new TimeoutList({ collection: this.timeouts });
         var stackView = new StackFrameList({ collection: this.stackFrames });
         var codeView = new CodeView({ timeouts: this.timeouts, stackFrames: this.stackFrames });
 
-        this.renderSubview(stackView, this.getByRole('stack'));
-        this.renderSubview(timeoutsView, this.getByRole('timeouts'));
-        this.renderSubview(codeView, this.getByRole('code'));
+        this.renderSubview(stackView, this.queryByHook('stack'));
+        this.renderSubview(timeoutsView, this.queryByHook('timeouts'));
+        this.renderSubview(codeView, this.queryByHook('code'));
         return this;
     }
 });

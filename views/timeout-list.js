@@ -4,14 +4,14 @@ var templates = require('../templates');
 var TimeoutItem = AndView.extend({
     template: templates.timeoutItem,
     bindings: {
-        id: '[role=id]',
-        state: [
-            ['[role=state]', 'text'],
-            ['li', 'class']
+        'model.id': '[data-hook=id]',
+        'model.state': [
+            { hook: 'state' },
+            { type: 'class', selector: 'li' }
         ]
     },
     render: function () {
-        this.renderAndBind();
+        this.renderWithTemplate();
         var self = this;
         this.listenTo(this.model, 'change:state', function () {
             this.el.setAttribute('class', self.model.state);
@@ -24,7 +24,7 @@ var TimeoutItem = AndView.extend({
 var TimeoutList = AndView.extend({
     template: templates.timeoutList,
     render: function () {
-        this.renderAndBind({});
+        this.renderWithTemplate();
         this.renderCollection(this.collection, TimeoutItem, this.el);
         return this;
     }

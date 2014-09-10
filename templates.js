@@ -2,8 +2,8 @@ var multiline = require('multiline');
 
 exports.timeoutItem = multiline(function () {/*
     <li>
-        <span role=state></span>
-        <span role=id></span>
+        <span data-hook=state></span>
+        <span data-hook=id></span>
     </li>
 */});
 
@@ -13,7 +13,7 @@ exports.timeoutList = multiline(function () {/*
 
 exports.stackFrame = multiline(function () {/*
     <li>
-        <span role=source></span>
+        <span data-hook=source></span>
     </li>
 */});
 
@@ -23,16 +23,16 @@ exports.stackFrameList = multiline(function () {/*
 
 exports.mainView = multiline(function () {/*
     <div>
-        <div role=stack></div>
-        <div role=code></div>
-        <div role=timeouts></div>
-        <div role=callbacks></div>
+        <div data-hook=stack></div>
+        <div data-hook=code></div>
+        <div data-hook=timeouts></div>
+        <div data-hook=callbacks></div>
     </div>
 */});
 
 exports.code = multiline(function () {/*
 <div>
-    <div role='editor' class='editor' contenteditable='true'>
+    <div data-hook='editor' class='editor' contenteditable='true'>
 console.log(console.log('hi' + 2));
 var a = console.log('hi');
 [1,2,3].map(function (a) {
@@ -46,7 +46,7 @@ var b = 2 + 2 + 2;
 
 exports.code = multiline(function () {/*
 <div>
-<div role='editor' class='editor' contenteditable='true'>function baz () {
+<div data-hook='editor' class='editor' contenteditable='true'>function baz () {
     console.log('bar');
 }
 function bar () {
@@ -59,15 +59,15 @@ function foo () {
 
 setTimeout(function () {
     foo();
-}, 1);
+}, 2000);
 
 setTimeout(function () {
     foo();
-}, 2);
+}, 1000);
 
 setTimeout(function () {
     foo();
-}, 3);
+}, 3000);
 </div>
 </div>
 */});

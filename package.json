@@ -7,25 +7,36 @@
     "test": "tests"
   },
   "dependencies": {
+    "ampersand-collection": "^1.3.15",
+    "ampersand-collection-underscore-mixin": "^1.0.2",
+    "ampersand-model": "^4.0.2",
+    "ampersand-state": "^4.3.10",
+    "ampersand-view": "^7.1.1",
+    "brace": "~0.3.0",
     "deval": "~0.1.1",
-    "brace": "~0.2.1",
-    "escodegen": "~1.2.0",
+    "escodegen": "~1.4.1",
+    "esprima": "~1.2.2",
     "falafel": "~0.3.1",
-    "hyperglue": "~1.3.0",
-    "jquery": "~2.1.0",
-    "multiline": "~0.2.0",
-    "tape": "~2.10.2",
-    "underscore": "~1.6.0",
-    "weevil": "~0.1.2",
-    "esprima": "~1.0.4",
-    "ampersand-model": "^2.7.2",
-    "ampersand-collection": "^0.2.3",
-    "ampersand-view": "^2.0.4",
-    "ampersand-collection-underscore-mixin": "^0.1.0"
+    "hyperglue": "~1.3.1",
+    "jquery": "~2.1.1",
+    "multiline": "~1.0.0",
+    "react": "^0.11.1",
+    "react-backbone-events-mixin": "^0.1.1",
+    "reactify": "^0.14.0",
+    "tape": "~2.14.0",
+    "underscore": "~1.7.0",
+    "weevil": "~0.1.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "autoprefixer": "^3.0.0",
+    "browserify": "^5.11.1",
+    "building-static-server": "^1.0.0",
+    "glob-cli": "^1.0.0",
+    "reactify": "^0.14.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "make build",
+    "start": "building-static-server -p 3050"
   },
   "author": "",
   "license": "ISC"

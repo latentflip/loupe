@@ -32,6 +32,10 @@ html, body {
   white-space: pre;
 }
 
+.editor span.running {
+  background: rgba(236, 117, 74, 0.25);
+}
+
 .code-node {
 }
 
@@ -45,7 +49,7 @@ html, body {
   -webkit-transition: background 0.25s linear;
 }
 
-[role=code] {
+[data-hook=code] {
   width: 50%;
   position: absolute;
   left: 50%;
@@ -53,7 +57,7 @@ html, body {
   height: 75%;
 }
 
-[role=stack] {
+[data-hook=stack] {
   width: 25%;
   position: absolute;
   top: 0;
@@ -62,7 +66,7 @@ html, body {
   border: 1px gray solid;
 }
 
-[role=stack] ul {
+[data-hook=stack] ul {
   position: absolute;
   bottom: 0;
   list-style-type: none;
@@ -71,14 +75,14 @@ html, body {
   margin: 0;
 }
 
-[role=stack] ul li {
+[data-hook=stack] ul li {
   padding: 10px;
   background: #F0E03F;
   margin: 10px;
   width: calc(100% - 20px);
 }
 
-[role=timeouts] {
+[data-hook=timeouts] {
   width: 100%;
   position: absolute;
   top: 75%;
@@ -86,7 +90,7 @@ html, body {
   height: 12.5%;
 }
 
-[role=timeouts]:before {
+[data-hook=timeouts]:before {
   content: "Timeouts:";
   opacity: 0.5;
   padding: 5px;
@@ -95,7 +99,7 @@ html, body {
   color: white;
 }
 
-[role=stack]:before {
+[data-hook=stack]:before {
   content: "Stack";
   opacity: 0.5;
   padding: 5px;
@@ -104,7 +108,7 @@ html, body {
   color: white;
 }
 
-[role=timeouts] li {
+[data-hook=timeouts] li {
   background: coral;
   padding: 20px;
   margin: 5px;
@@ -112,17 +116,17 @@ html, body {
   display: inline-block;
 }
 
-[role=timeouts] li.started {
+[data-hook=timeouts] li.started {
   background: lime;
 }
 
-[role=timeouts] li.finished {
+[data-hook=timeouts] li.finished {
   background: lime;
   opacity: 0.25;
 }
 
 
-[role=callbacks] {
+[data-hook=callbacks] {
   width: 100%;
   position: absolute;
   top: 87.5%;
