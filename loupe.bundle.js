@@ -76,9 +76,11 @@ module.exports = React.createClass({displayName: 'exports',
     registerListeners: function (props, state) {
         var self = this;
 
-        state.stack.on('all', function () {
+        this.listenTo(state.stack, 'all', function () {
+            console.log('FORCE');
             self.forceUpdate();
         });
+
     },
 
     getInitialState: function () {
@@ -120,7 +122,7 @@ module.exports = React.createClass({displayName: 'exports',
         };
     },
     registerListeners: function (props, state) {
-        state.queue.on('all', function () {
+        this.listenTo(state.queue, 'all', function () {
             this.forceUpdate();
         }.bind(this));
     },
@@ -195,14 +197,15 @@ module.exports = React.createClass({displayName: 'exports',
     },
 
     onBlur: function () {
+        console.log(this.refs.code.getDOMNode().innerHTML);
         this.state.code.html = this.refs.code.getDOMNode().innerHTML;
         this.setState({ editing: false });
         this.state.code.run();
     },
 
     onFocus: function () {
+        this.state.code.resetEverything();
         this.setState({ editing: true });
-        console.log('focus');
     },
 
     render: function () {
@@ -293,9 +296,9 @@ module.exports = React.createClass({displayName: 'exports',
     mixins: [
         EventMixin
     ],
-    
+
     registerListeners: function (props, state) {
-        state.apis.on('all', function () {
+        this.listenTo(state.apis, 'all', function () {
             this.forceUpdate();
         }.bind(this));
     },
@@ -309,7 +312,7 @@ module.exports = React.createClass({displayName: 'exports',
     render: function () {
         var apis = this.state.apis.map(function (api) {
             if (api.type === 'timeout') {
-                return WebApiTimer({timeout: api.timeoutString}, api.code);
+                return WebApiTimer({timeout: api.timeoutString, key: api.id}, api.code);
             }
         });
 
@@ -511,12 +514,12 @@ module.exports = function (code, insertionPoints, options) {
 
 
 },{"./text-cursor":13}],15:[function(require,module,exports){
-var React = require('react');
+var React = require('react/addons');
+window.React = React;
 var App = require('./components/app.jsx');
 var AmpersandCollection = require('ampersand-collection');
 var AmpersandState = require('ampersand-state');
 var deval = require('deval');
-
 
 var CallStack = AmpersandCollection.extend({
 });
@@ -533,12 +536,10 @@ function foo () {
 
 function bar () {
     console.log('there');
-    console.log('there');
-    console.log('there');
 }
 
 setTimeout(foo, 4000);
-setTimeout(foo, 1000);
+setTimeout(foo, 4000);
 setTimeout(bar, 250);
 });
 
@@ -550,6 +551,10 @@ window.app.store = {
     apis: new Apis(),
     queue: new CallbackQueue()
 };
+
+app.store.code.on('all', function () {
+    console.log('Code event', arguments);
+});
 
 app.store.code.on('node:will-run', function (id, source) {
     app.store.callstack.add({
@@ -568,6 +573,9 @@ app.store.code.on('webapi:started', function (data) {
 
 app.store.code.on('callback:shifted', function (id) {
     var callback = app.store.queue.get(id);
+    if (!callback) {
+        callback = app.store.apis.get(id);
+    }
 
     app.store.callstack.add({
         id: callback.id,
@@ -584,6 +592,11 @@ app.store.apis.on('callback:spawn', function (data) {
     app.store.queue.add(data);
 });
 
+app.store.code.on('reset-everything', function () {
+    app.store.queue.reset();
+    app.store.callstack.reset();
+    app.store.apis.reset();
+});
 
 
 //app.store.apis.add([
@@ -593,7 +606,7 @@ app.store.apis.on('callback:spawn', function (data) {
 
 React.renderComponent(App(), document.body);
 
-},{"./components/app.jsx":1,"./models/apis":16,"./models/callback-queue":17,"./models/code":19,"ampersand-collection":20,"ampersand-state":26,"deval":32,"react":198}],16:[function(require,module,exports){
+},{"./components/app.jsx":1,"./models/apis":16,"./models/callback-queue":17,"./models/code":19,"ampersand-collection":20,"ampersand-state":26,"deval":32,"react/addons":39}],16:[function(require,module,exports){
 var AmpersandCollection = require('ampersand-collection');
 var AmpersandState = require('ampersand-state');
 
@@ -708,10 +721,15 @@ module.exports = AmpersandState.extend({
         }
     },
 
+    resetEverything: function () {
+        this.trigger('reset-everything');
+        if (this.worker) { this.worker.kill(); }
+    },
+
     run: function () {
         var self = this;
 
-        if (this.worker) { this.worker.kill(); }
+        this.resetEverything();
 
         this.worker = weevil(this.workerCode);
 
@@ -28627,17 +28645,28 @@ function emitterFor (scope) {
     var inWebworkerThread = typeof Window === void 0;
 
     var onMessage = function (message) {
+        console.timeStamp('onmessage');
+        console.time('onmessage');
+        
+        console.time(' - onmessageA');
         var cbs;
         message = JSON.parse(message.data);
+        console.timeEnd(' - onmessageA');
 
         if (!message.weevil) return;
 
         cbs = weevil.callbacks[message.name];
         if (!cbs || !cbs.length) return;
 
+        console.time(' - onmessageB');
+        console.log(cbs.length, cbs[0]);
         cbs.forEach(function (cb) {
             cb.apply(cb, message.args);
         });
+        console.timeEnd(' - onmessageB');
+
+        console.timeStamp('/onmessage');
+        console.timeEnd('onmessage');
     };
 
     var weevil = {

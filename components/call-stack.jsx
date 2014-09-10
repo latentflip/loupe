@@ -10,9 +10,11 @@ module.exports = React.createClass({
     registerListeners: function (props, state) {
         var self = this;
 
-        state.stack.on('all', function () {
+        this.listenTo(state.stack, 'all', function () {
+            console.log('FORCE');
             self.forceUpdate();
         });
+
     },
 
     getInitialState: function () {

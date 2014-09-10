@@ -15,7 +15,7 @@ module.exports = React.createClass({
         };
     },
     registerListeners: function (props, state) {
-        state.queue.on('all', function () {
+        this.listenTo(state.queue, 'all', function () {
             this.forceUpdate();
         }.bind(this));
     },

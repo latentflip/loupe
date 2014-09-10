@@ -54,10 +54,15 @@ module.exports = AmpersandState.extend({
         }
     },
 
+    resetEverything: function () {
+        this.trigger('reset-everything');
+        if (this.worker) { this.worker.kill(); }
+    },
+
     run: function () {
         var self = this;
 
-        if (this.worker) { this.worker.kill(); }
+        this.resetEverything();
 
         this.worker = weevil(this.workerCode);
 

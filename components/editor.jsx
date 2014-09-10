@@ -34,14 +34,15 @@ module.exports = React.createClass({
     },
 
     onBlur: function () {
+        console.log(this.refs.code.getDOMNode().innerHTML);
         this.state.code.html = this.refs.code.getDOMNode().innerHTML;
         this.setState({ editing: false });
         this.state.code.run();
     },
 
     onFocus: function () {
+        this.state.code.resetEverything();
         this.setState({ editing: true });
-        console.log('focus');
     },
 
     render: function () {

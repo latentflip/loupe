@@ -1,9 +1,9 @@
-var React = require('react');
+var React = require('react/addons');
+window.React = React;
 var App = require('./components/app.jsx');
 var AmpersandCollection = require('ampersand-collection');
 var AmpersandState = require('ampersand-state');
 var deval = require('deval');
-
 
 var CallStack = AmpersandCollection.extend({
 });
@@ -38,6 +38,10 @@ window.app.store = {
     queue: new CallbackQueue()
 };
 
+app.store.code.on('all', function () {
+    console.log('Code event', arguments);
+});
+
 app.store.code.on('node:will-run', function (id, source) {
     app.store.callstack.add({
         id: id, code: source
@@ -55,6 +59,9 @@ app.store.code.on('webapi:started', function (data) {
 
 app.store.code.on('callback:shifted', function (id) {
     var callback = app.store.queue.get(id);
+    if (!callback) {
+        callback = app.store.apis.get(id);
+    }
 
     app.store.callstack.add({
         id: callback.id,
@@ -71,6 +78,11 @@ app.store.apis.on('callback:spawn', function (data) {
     app.store.queue.add(data);
 });
 
+app.store.code.on('reset-everything', function () {
+    app.store.queue.reset();
+    app.store.callstack.reset();
+    app.store.apis.reset();
+});
 
 
 //app.store.apis.add([

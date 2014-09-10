@@ -6,9 +6,9 @@ module.exports = React.createClass({
     mixins: [
         EventMixin
     ],
-    
+
     registerListeners: function (props, state) {
-        state.apis.on('all', function () {
+        this.listenTo(state.apis, 'all', function () {
             this.forceUpdate();
         }.bind(this));
     },
@@ -22,7 +22,7 @@ module.exports = React.createClass({
     render: function () {
         var apis = this.state.apis.map(function (api) {
             if (api.type === 'timeout') {
-                return <WebApiTimer timeout={api.timeoutString}>{api.code}</WebApiTimer>;
+                return <WebApiTimer timeout={api.timeoutString} key={api.id}>{api.code}</WebApiTimer>;
             }
         });
 
