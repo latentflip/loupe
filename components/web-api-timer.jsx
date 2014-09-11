@@ -8,7 +8,7 @@ module.exports = React.createClass({
         };
 
         return (
-            <div className='webapi-timer'>
+            <div className='webapi webapi-timer'>
               <div className="webapi-code">
                 {this.props.children}
               </div>

@@ -14,7 +14,6 @@ module.exports = React.createClass({
 
     registerListeners: function (props, state) {
         this.listenTo(state.code, 'callback:shifted', function () {
-            console.log('spinning');
             var domnode = this.refs.spinner.getDOMNode();
             domnode.classList.add('spinner-wrapper-transition');
             var onTransitionEnd = function () {

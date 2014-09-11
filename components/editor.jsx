@@ -34,15 +34,35 @@ module.exports = React.createClass({
     },
 
     onBlur: function () {
-        console.log(this.refs.code.getDOMNode().innerHTML);
-        this.state.code.html = this.refs.code.getDOMNode().innerHTML;
+        var newCode = this.refs.code.getDOMNode().innerText;
+        this.state.code.html = newCode;
         this.setState({ editing: false });
-        this.state.code.run();
+        //this.state.code.run();
     },
 
     onFocus: function () {
         this.state.code.resetEverything();
         this.setState({ editing: true });
+    },
+
+    onKeyDown: function (e) {
+        if (e.keyCode === 9) {
+            e.preventDefault();
+
+            var el = this.refs.code.getDOMNode();
+            var sel = window.getSelection();
+            var current = el.innerText;
+            var range = sel.getRangeAt(0);
+
+            console.log(range);
+            var caretPos = sel.extentOffset;
+            current = current.substr(0, caretPos) + '  ' + current.substr(caretPos);
+            el.innerText = current;
+            //setTimeout(function () {
+            //    sel.removeAllRanges();
+            //    sel.addRange(range);
+            //}, 0);
+        }
     },
 
     render: function () {
@@ -54,6 +74,7 @@ module.exports = React.createClass({
                  contentEditable
                  onBlur={this.onBlur}
                  onFocus={this.onFocus}
+                 onKeyDown={this.onKeyDown}
                  dangerouslySetInnerHTML={ {__html: innerHTML} }
             ></div>
         );

@@ -99,10 +99,13 @@ body {
   background: #eee;
 }
 
-.webapi-timer {
+.webapi {
   padding: 5px;
   border: 2px #ddd solid;
   margin: 5px;
+}
+
+.webapi-timer {
 }
 
 .webapi-code {

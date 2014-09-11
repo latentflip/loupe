@@ -1,5 +1,6 @@
 var React = require('react');
 var WebApiTimer = require('./web-api-timer.jsx');
+var WebApiQuery = require('./web-api-query.jsx');
 var EventMixin = require('react-backbone-events-mixin');
 
 module.exports = React.createClass({
@@ -23,6 +24,13 @@ module.exports = React.createClass({
         var apis = this.state.apis.map(function (api) {
             if (api.type === 'timeout') {
                 return <WebApiTimer timeout={api.timeoutString} key={api.id}>{api.code}</WebApiTimer>;
+            }
+            if (api.type === 'query') {
+                return (
+                    <WebApiQuery key={api.id}>
+                        {api.code}
+                    </WebApiQuery>
+                );
             }
         });
 

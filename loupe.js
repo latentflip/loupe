@@ -12,24 +12,38 @@ var Code = require('./models/code');
 var Apis = require('./models/apis');
 var CallbackQueue = require('./models/callback-queue');
 
+
+var Router = require('./router');
+
+
+
 var initialCode = deval(function () {
-var foo, bar;
-function foo () {
-    console.log('Hi!');
-}
+console.log('hello', 'bob');
+console.log('there');
 
-function bar () {
-    console.log('there');
-    console.log('there');
-    console.log('there');
+function foo (console) {
+    console.log('boo');
 }
-
-setTimeout(foo, 4000);
-setTimeout(foo, 1000);
-setTimeout(bar, 250);
+//$.on('button', 'click', function () { console.log('$server event'); });
+//var foo, bar;
+//function foo () {
+//    console.log('Hi!');
+//}
+//
+//function bar () {
+//    console.log('there');
+//    console.log('there');
+//    console.log('there');
+//}
+//
+//setTimeout(foo, 4000);
+//setTimeout(foo, 1000);
+//setTimeout(bar, 250);
 });
 
 window.app = {};
+
+window.app.router = new Router();
 
 window.app.store = {
     callstack: new CallStack(),
@@ -38,9 +52,13 @@ window.app.store = {
     queue: new CallbackQueue()
 };
 
-app.store.code.on('all', function () {
-    console.log('Code event', arguments);
+app.store.code.on('change:encodedSource', function () {
+    app.router.navigate('?code=' + app.store.code.encodedSource);
 });
+
+//app.store.code.on('all', function () {
+//    console.log('Code event', arguments);
+//});
 
 app.store.code.on('node:will-run', function (id, source) {
     app.store.callstack.add({
@@ -53,7 +71,6 @@ app.store.code.on('node:did-run', function (id) {
 });
 
 app.store.code.on('webapi:started', function (data) {
-    console.log(data);
     app.store.apis.add(data, { merge: true });
 });
 
@@ -74,6 +91,10 @@ app.store.code.on('callback:completed', function (id) {
     app.store.callstack.remove(id);
 });
 
+app.store.code.on('callback:spawn', function (data) {
+    app.store.queue.add(data);
+});
+
 app.store.apis.on('callback:spawn', function (data) {
     app.store.queue.add(data);
 });
@@ -89,5 +110,6 @@ app.store.code.on('reset-everything', function () {
 //    { id: '1', type: 'timeout', timeout: 5000, code: "foo();" },
 //    { id: '2', type: 'timeout', timeout: 10000, code: "bar();" }
 //]);
+window.app.router.history.start({ pushState: true });
 
 React.renderComponent(App(), document.body);

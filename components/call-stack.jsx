@@ -11,7 +11,6 @@ module.exports = React.createClass({
         var self = this;
 
         this.listenTo(state.stack, 'all', function () {
-            console.log('FORCE');
             self.forceUpdate();
         });
 

@@ -6,6 +6,9 @@ var weevil = require('weevil');
 var tag = require('../lib/tag');
 var delay = require('../lib/delay');
 
+var $ = require('../lib/plugins/query');
+var consolePlugin = require('../lib/plugins/console');
+
 var cleanupCode = function (code) {
     return code.replace(/<br>/g, '\n');
 };
@@ -16,6 +19,12 @@ module.exports = AmpersandState.extend({
         worker: 'any'
     },
     derived: {
+        encodedSource: {
+            deps: ['html'],
+            fn: function () {
+                return encodeURIComponent(btoa(this.html));
+            }
+        },
         cleanCode: {
             deps: ['html'],
             fn: function () {
@@ -23,7 +32,7 @@ module.exports = AmpersandState.extend({
             }
         },
         instrumented: {
-            deps: ['html'],
+            deps: ['cleanCode'],
             fn: function () {
                 return instrumentAndWrapHTML(this.cleanCode);
             }
@@ -54,6 +63,10 @@ module.exports = AmpersandState.extend({
         }
     },
 
+    decodeUriSource: function (encoded) {
+        this.html = atob(decodeURIComponent(encoded));
+    },
+
     resetEverything: function () {
         this.trigger('reset-everything');
         if (this.worker) { this.worker.kill(); }
@@ -66,6 +79,10 @@ module.exports = AmpersandState.extend({
 
         this.worker = weevil(this.workerCode);
 
+        //TODO this shouldn't know about the scratchpad
+        $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
+        consolePlugin.createClient(this, this.worker);
+
         this.worker
                 .on('node:before', function (node) {
                     self.trigger('node:will-run', node.id, self.nodeSourceCode[node.id]);
@@ -76,9 +93,7 @@ module.exports = AmpersandState.extend({
                     //$('#node-' + node.id).removeClass('running');
                 })
                 .on('timeout:created', function (timer) {
-                    console.log(timer);
 
-                    console.log('Timeout created', timer.id);
                     self.trigger('webapi:started', {
                         id: 'timer:' + timer.id,
                         type: 'timeout',
@@ -87,12 +102,16 @@ module.exports = AmpersandState.extend({
                     });
                 })
                 .on('timeout:started', function (timer) {
-                    console.log('Timeout started', timer.id);
                     self.trigger('callback:shifted', 'timer:' + timer.id);
                 })
                 .on('timeout:finished', function (timer) {
-                    console.log('Timeout finished', timer.id);
                     self.trigger('callback:completed', 'timer:' + timer.id);
+                })
+                .on('callback:shifted', function (callbackId) {
+                    self.trigger('callback:shifted', callbackId);
+                })
+                .on('callback:completed', function (callbackId) {
+                    self.trigger('callback:completed', callbackId);
                 });
     }
 });
@@ -135,25 +154,30 @@ var instrumentAndWrapHTML = function (code) {
     };
 };
 
+function prependCode(prepend, code) {
+    return prepend + ';\n' + code;
+}
+
 var makeWorkerCode = function (code) {
-    return deval(function (delayMaker, code) {
+    code = prependCode(deval(function (delayMaker) {
         var delayMaker = $delayMaker$;
 
         var delay = delayMaker(750);
 
         //Override setTimeout
         var _setTimeout = self.setTimeout;
-        self.setTimeout = function (fn, delay/*, args...*/) {
+        self.setTimeout = function (fn, timeout/*, args...*/) {
             var args = Array.prototype.slice.call(arguments);
             fn = args.shift();
             var timerId;
 
             var queued = +new Date();
-            var data = { id: timerId, delay: delay, created: +new Date(), state: 'timing', code: (fn.name || "anonymous") + "()"  };
+            var data = { id: timerId, delay: timeout, created: +new Date(), state: 'timing', code: (fn.name || "anonymous") + "()"  };
             args.unshift(function () {
                 data.state = 'started';
                 data.started = +new Date();
-                data.error = (data.started - data.queued) - delay;
+                data.error = (data.started - data.queued) - timeout;
+                delay();
                 weevil.send('timeout:started', data);
 
                 fn.apply(fn, arguments);
@@ -161,13 +185,16 @@ var makeWorkerCode = function (code) {
                 data.state = 'finished';
                 data.finished = +new Date();
                 weevil.send('timeout:finished', data);
+                delay();
             });
 
             data.id = _setTimeout.apply(self, args);
             weevil.send('timeout:created', data);
         };
 
-        $code$;
+    }, delay.toString()), code);
 
-    }, delay.toString(), code);
+    code = $.prependWorkerCode(code);
+    code = consolePlugin.prependWorkerCode(code);
+    return code;
 };
