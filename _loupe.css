@@ -1,4 +1,4 @@
-* { 
+*, *:before, *:after { 
   box-sizing: border-box;
 }
 
@@ -68,6 +68,11 @@ body {
 
 .editorBox, .stackRow {
   flex: 3;
+  position: relative;
+}
+
+.editorBox {
+  background: #FDF6E3;
 }
 
 .codeColumn {
@@ -81,10 +86,37 @@ body {
   width: 100%;
   font-family: monospace;
   font-size: 13px;
-  line-height: 1.5;
-  padding: 10px;
+  line-height: 1.75;
   display: inline-block;
   white-space: pre;
+  padding-left: 45px;
+  color: #333;
+  font-family: Monaco, Menlo, 'Ubuntu Mono', Consolas, source-code-pro, monospace;
+  font-size: 12px;
+  overflow-y: hidden;
+  position: relative;
+}
+
+.editor:before {
+  content: attr(data-lines);
+  /*content: "1\a 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9\A 10\A 11\A 12\A 13\A 14\A 15\A 16\A 17\A";*/
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 41px;
+  padding-left: 7.5px;
+  text-align: center;
+  background: #FBF1D3;
+  height: 100%;
+  white-space: pre;
+}
+
+.ace-editor-wrapper {
+  flex: 1;
+}
+
+.ace_editor {
+  line-height: 1.75!important;
 }
 
 .html-scratchpad {
@@ -92,7 +124,7 @@ body {
   background: #eee;
 }
 
-.webapi-timer {
+.webapi {
   padding: 5px;
   border: 2px #ddd solid;
   margin: 5px;
@@ -347,4 +379,15 @@ body {
 .tr-queue-leave.tr-queue-leave-active {
   transform: translate(0, -100px);
   opacity: 0.01;
+}
+
+.htmlEditorBox {
+  position: relative;
+}
+
+.editor-switch {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 9999;
 }

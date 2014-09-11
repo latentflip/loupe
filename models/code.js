@@ -15,20 +15,39 @@ var cleanupCode = function (code) {
 
 module.exports = AmpersandState.extend({
     props: {
-        html: 'string',
+        htmlScratchpad: ['array', true],
+        codeLines: ['array', true],
         worker: 'any'
     },
     derived: {
-        encodedSource: {
-            deps: ['html'],
+        rawHtmlScratchpad: {
+            deps: ['htmlScratchpad'],
             fn: function () {
-                return encodeURIComponent(btoa(this.html));
+                return this.htmlScratchpad.join('\n');
+            }
+        },
+        html: {
+            deps: ['codeLines'],
+            fn: function () {
+                return this.codeLines.join('<br>');
+            }
+        },
+        rawCode: {
+            deps: ['codeLines'],
+            fn: function () {
+                return this.codeLines.join('\n');
+            }
+        },
+        encodedSource: {
+            deps: ['rawCode', 'rawHtmlScratchpad'],
+            fn: function () {
+                return encodeURIComponent(btoa(this.rawCode) + "!!!" + btoa(this.rawHtmlScratchpad));
             }
         },
         cleanCode: {
-            deps: ['html'],
+            deps: ['rawCode'],
             fn: function () {
-                return cleanupCode(this.html.trim());
+                return this.rawCode;
             }
         },
         instrumented: {
@@ -64,7 +83,17 @@ module.exports = AmpersandState.extend({
     },
 
     decodeUriSource: function (encoded) {
-        this.html = atob(decodeURIComponent(encoded));
+        var parts = decodeURIComponent(encoded).split('!!!');
+        try {
+            this.codeLines = atob(parts[0]).split('\n');
+        } catch (e) {
+            this.codeLines = [];
+        }
+        try {
+            this.htmlScratchpad = atob(parts[1]).split('\n');
+        } catch (e) {
+            this.htmlScratchpad = [];
+        }
     },
 
     resetEverything: function () {
@@ -73,46 +102,50 @@ module.exports = AmpersandState.extend({
     },
 
     run: function () {
-        var self = this;
+        this.trigger('ready-to-run');
 
-        this.resetEverything();
+        setTimeout(function () {
+            var self = this;
 
-        this.worker = weevil(this.workerCode);
+            this.resetEverything();
 
-        //TODO this shouldn't know about the scratchpad
-        $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
-        consolePlugin.createClient(this, this.worker);
+            this.worker = weevil(this.workerCode);
 
-        this.worker
-                .on('node:before', function (node) {
-                    self.trigger('node:will-run', node.id, self.nodeSourceCode[node.id]);
-                    //$('#node-' + node.id).addClass('running');
-                })
-                .on('node:after', function (node) {
-                    self.trigger('node:did-run', node.id);
-                    //$('#node-' + node.id).removeClass('running');
-                })
-                .on('timeout:created', function (timer) {
+            //TODO this shouldn't know about the scratchpad
+            $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
+            consolePlugin.createClient(this, this.worker);
 
-                    self.trigger('webapi:started', {
-                        id: 'timer:' + timer.id,
-                        type: 'timeout',
-                        timeout: timer.delay,
-                        code: timer.code.split('\n').join(' ')
+            this.worker
+                    .on('node:before', function (node) {
+                        self.trigger('node:will-run', node.id, self.nodeSourceCode[node.id]);
+                        //$('#node-' + node.id).addClass('running');
+                    })
+                    .on('node:after', function (node) {
+                        self.trigger('node:did-run', node.id);
+                        //$('#node-' + node.id).removeClass('running');
+                    })
+                    .on('timeout:created', function (timer) {
+
+                        self.trigger('webapi:started', {
+                            id: 'timer:' + timer.id,
+                            type: 'timeout',
+                            timeout: timer.delay,
+                            code: timer.code.split('\n').join(' ')
+                        });
+                    })
+                    .on('timeout:started', function (timer) {
+                        self.trigger('callback:shifted', 'timer:' + timer.id);
+                    })
+                    .on('timeout:finished', function (timer) {
+                        self.trigger('callback:completed', 'timer:' + timer.id);
+                    })
+                    .on('callback:shifted', function (callbackId) {
+                        self.trigger('callback:shifted', callbackId);
+                    })
+                    .on('callback:completed', function (callbackId) {
+                        self.trigger('callback:completed', callbackId);
                     });
-                })
-                .on('timeout:started', function (timer) {
-                    self.trigger('callback:shifted', 'timer:' + timer.id);
-                })
-                .on('timeout:finished', function (timer) {
-                    self.trigger('callback:completed', 'timer:' + timer.id);
-                })
-                .on('callback:shifted', function (callbackId) {
-                    self.trigger('callback:shifted', callbackId);
-                })
-                .on('callback:completed', function (callbackId) {
-                    self.trigger('callback:completed', callbackId);
-                });
+        }.bind(this), 0);
     }
 });
 

@@ -6,6 +6,7 @@ var EventLoopSpinner = require('./event-loop-spinner.jsx');
 var WebApis = require('./web-apis.jsx');
 var Editor = require('./editor.jsx');
 var CallbackQueue = require('./callback-queue.jsx');
+var HTMLEditor = require('./html-editor.jsx');
 
 module.exports = React.createClass({
     render: function () {
@@ -18,10 +19,8 @@ module.exports = React.createClass({
                   <Editor/>
                 </div>
 
-                <div className="flexChild columnParent">
-                  <div className="flexChild html-scratchpad">
-                    <button>Hello</button>
-                  </div>
+                <div className="flexChild columnParent htmlEditorBox">
+                  <HTMLEditor/>
                 </div>
               </div>
 

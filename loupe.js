@@ -15,42 +15,19 @@ var CallbackQueue = require('./models/callback-queue');
 
 var Router = require('./router');
 
-
-
-var initialCode = deval(function () {
-console.log('hello', 'bob');
-console.log('there');
-
-function foo (console) {
-    console.log('boo');
-}
-//$.on('button', 'click', function () { console.log('$server event'); });
-//var foo, bar;
-//function foo () {
-//    console.log('Hi!');
-//}
-//
-//function bar () {
-//    console.log('there');
-//    console.log('there');
-//    console.log('there');
-//}
-//
-//setTimeout(foo, 4000);
-//setTimeout(foo, 1000);
-//setTimeout(bar, 250);
-});
-
 window.app = {};
 
 window.app.router = new Router();
 
 window.app.store = {
     callstack: new CallStack(),
-    code: new Code({ html: initialCode }),
+    code: new Code(),
     apis: new Apis(),
     queue: new CallbackQueue()
 };
+
+app.store.code.on('change:codeLines', function () {
+});
 
 app.store.code.on('change:encodedSource', function () {
     app.router.navigate('?code=' + app.store.code.encodedSource);

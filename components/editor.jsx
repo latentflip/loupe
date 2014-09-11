@@ -2,6 +2,7 @@
 
 var React = require('react');
 var EventMixin = require('react-backbone-events-mixin');
+var AceEditor = require('./ace-editor.jsx');
 
 module.exports = React.createClass({
     mixins: [
@@ -29,54 +30,78 @@ module.exports = React.createClass({
     getInitialState: function () {
         return {
             code: app.store.code,
-            editing: false
+            editing: true
         };
     },
 
-    onBlur: function () {
-        var newCode = this.refs.code.getDOMNode().innerText;
-        this.state.code.html = newCode;
-        this.setState({ editing: false });
-        //this.state.code.run();
+    onCodeChange: function (newCode) {
+        this.state.code.codeLines = newCode;
     },
 
-    onFocus: function () {
+    onEditBlur: function () {
+        this.setState({ editing: false });
+        //var newCode = this.refs.code.getDOMNode().innerText;
+        //this.state.code.html = newCode;
+        //this.setState({ editing: false });
+    },
+
+    saveAndRunCode: function () {
+        this.setState({ editing: false });
+        this.state.code.run();
+    },
+
+    onEditFocus: function () {
         this.state.code.resetEverything();
         this.setState({ editing: true });
     },
 
-    onKeyDown: function (e) {
-        if (e.keyCode === 9) {
-            e.preventDefault();
-
-            var el = this.refs.code.getDOMNode();
-            var sel = window.getSelection();
-            var current = el.innerText;
-            var range = sel.getRangeAt(0);
-
-            console.log(range);
-            var caretPos = sel.extentOffset;
-            current = current.substr(0, caretPos) + '  ' + current.substr(caretPos);
-            el.innerText = current;
-            //setTimeout(function () {
-            //    sel.removeAllRanges();
-            //    sel.addRange(range);
-            //}, 0);
-        }
-    },
-
     render: function () {
-        var innerHTML = this.state.editing ? this.state.code.html : this.state.code.wrappedHtml;
+        if (this.state.editing) {
+            return (
+                <div className="flexChild columnParent">
+                    <div className='editor-switch'>
+                        <button onClick={this.saveAndRunCode}>Save + Run</button>
+                    </div>
+                    <AceEditor
+                        mode="javascript"
+                        //onBlur={this.onEditBlur}
+                        onCodeChange={this.onCodeChange}
+                        initialValue={this.state.code.rawCode}
+                    />
+                </div>
+            );
+        } else {
+            var i = 0;
+            var lines = this.state.code.codeLines.map(function () { i++; return i; }).join(String.fromCharCode(10));
 
-        return (
-            <div className="editor flexChild"
-                 ref="code"
-                 contentEditable
-                 onBlur={this.onBlur}
-                 onFocus={this.onFocus}
-                 onKeyDown={this.onKeyDown}
-                 dangerouslySetInnerHTML={ {__html: innerHTML} }
-            ></div>
-        );
+            return (
+                <div className="flexChild columnParent">
+                    <div className='editor-switch'>
+                        <button onClick={this.onEditFocus}>Edit</button>
+                    </div>
+                    <div
+                      className="editor flexChild"
+                      dangerouslySetInnerHTML={ {__html: this.state.code.wrappedHtml} }
+                      onClick={this.onEditFocus}
+                      ref="code"
+                      data-lines={lines}
+                    ></div>
+                </div>
+            );
+
+        }
+
+        //var innerHTML = this.state.editing ? this.state.code.html : this.state.code.wrappedHtml;
+
+        //return (
+        //    <div className="editor flexChild"
+        //         ref="code"
+        //         contentEditable
+        //         onBlur={this.onBlur}
+        //         onFocus={this.onFocus}
+        //         onKeyDown={this.onKeyDown}
+        //         dangerouslySetInnerHTML={ {__html: innerHTML} }
+        //    ></div>
+        //);
     }
 });
