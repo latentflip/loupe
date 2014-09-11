@@ -10,9 +10,7 @@ module.exports = React.createClass({
         return {
             mode: 'javascript',
             initialValue: '',
-            onBlur: function () {
-                console.log('Code blurred!');
-            },
+            onBlur: function () { },
             onCodeChange: function (newCode) {
                 console.log('Code changed to', newCode);
             }
@@ -37,7 +35,7 @@ module.exports = React.createClass({
     componentWillUnmount: function () {
         this.editor.destroy();
     },
-    
+
     render: function () {
         return (
             <div className="ace-editor-wrapper"></div>

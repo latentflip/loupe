@@ -11,9 +11,7 @@ module.exports = React.createClass({displayName: 'exports',
         return {
             mode: 'javascript',
             initialValue: '',
-            onBlur: function () {
-                console.log('Code blurred!');
-            },
+            onBlur: function () { },
             onCodeChange: function (newCode) {
                 console.log('Code changed to', newCode);
             }
@@ -38,7 +36,7 @@ module.exports = React.createClass({displayName: 'exports',
     componentWillUnmount: function () {
         this.editor.destroy();
     },
-    
+
     render: function () {
         return (
             React.DOM.div({className: "ace-editor-wrapper"})
@@ -895,7 +893,11 @@ app.store.code.on('reset-everything', function () {
 //    { id: '1', type: 'timeout', timeout: 5000, code: "foo();" },
 //    { id: '2', type: 'timeout', timeout: 10000, code: "bar();" }
 //]);
-window.app.router.history.start({ pushState: true });
+if (window.location.match('latentflip.com')) {
+    window.app.router.history.start({ pushState: true, root: '/loupe/' });
+} else {
+    window.app.router.history.start({ pushState: true });
+}
 
 React.renderComponent(App(), document.body);
 
