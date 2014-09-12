@@ -1,4 +1,5 @@
-var React = require('react');
+var React = require('react/addons');
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 var CallStackItem = require('./call-stack-item.jsx');
 var EventsMixin = require('react-backbone-events-mixin');
 
@@ -26,13 +27,15 @@ module.exports = React.createClass({
         var calls = [];
 
         this.state.stack.each(function (call) {
-            calls.unshift(<CallStackItem key={call.id}>{call.code}</CallStackItem>);
+            calls.unshift(<CallStackItem key={call.id} isCallback={call.isCallback}>{call.code}</CallStackItem>);
         });
 
         return (
             <div className="stack-wrapper flexChild">
                 <div className="stack">
-                  {calls}
+                  <ReactCSSTransitionGroup transitionName="tr-stack">
+                    {calls}
+                  </ReactCSSTransitionGroup>
                 </div>
             </div>
         );

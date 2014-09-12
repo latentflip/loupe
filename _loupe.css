@@ -308,7 +308,7 @@ body {
 }
 
 .callback-queue:before {
-  content: "Call Stack";
+  content: "Callback Queue";
 }
 
 .stack {
@@ -407,8 +407,35 @@ body {
 } 
 
 
+/*********************************/
+.tr-webapis-enter {
+  background: rgb(255,255,194);
+  transition: background 0.2s linear;
+}
+
+.tr-webapis-enter.tr-webapis-enter-active {
+  background: white;
+}
+
+.tr-webapis-leave {
+  transition: background 0.01s linear;
+}
+
+.tr-webapis-leave.tr-webapis-leave-active {
+}
+
+.tr-webapi-spawn {
+  background: white;
+  transition: background 0.1s linear;
+}
+
+.tr-webapi-spawn.tr-webapi-spawn-active {
+  background: rgb(255, 175, 146);
+}
+
+/*********************************/
 .tr-queue-enter {
-  background: yello;
+  background: rgb(255,255,194);
   transition: background 0.2s linear;
 }
 
@@ -425,6 +452,34 @@ body {
 .tr-queue-leave.tr-queue-leave-active {
   transform: translate(0, -100px);
   opacity: 0.01;
+}
+
+
+/*********************************/
+.tr-stack-enter {
+  transform: translate(0, 0);
+  opacity: 0.01;
+  transition: all 0.1s linear;
+}
+
+.tr-stack-enter.stack-item-callback {
+  transform: translate(0, 100px);
+  transition: all 0.25s linear;
+}
+
+.tr-stack-enter.tr-stack-enter-active {
+  transform: translate(0, 0);
+  opacity: 1;
+}
+
+.tr-stack-leave {
+  opacity: 1;
+  transition: all 0.1s linear;
+}
+
+.tr-stack-leave.tr-stack-leave-active {
+  opacity: 0.01;
+  transition: all 0.1s linear;
 }
 
 .htmlEditorBox {

@@ -37,14 +37,15 @@ app.store.code.on('change:encodedSource', function () {
 //    console.log('Code event', arguments);
 //});
 
-app.store.code.on('node:will-run', function (id, source) {
+app.store.code.on('node:will-run', function (id, source, invocation) {
     app.store.callstack.add({
-        id: id, code: source
+        id: id + ':' + invocation,
+        code: source
     });
 });
 
-app.store.code.on('node:did-run', function (id) {
-    app.store.callstack.remove(id);
+app.store.code.on('node:did-run', function (id, invocation) {
+    app.store.callstack.remove(id + ':' + invocation);
 });
 
 app.store.code.on('webapi:started', function (data) {
@@ -58,17 +59,23 @@ app.store.code.on('callback:shifted', function (id) {
     }
 
     app.store.callstack.add({
-        id: callback.id,
-        code: callback.code
+        id: callback.id.toString(),
+        code: callback.code,
+        isCallback: true
     });
     app.store.queue.remove(callback);
 });
 
 app.store.code.on('callback:completed', function (id) {
-    app.store.callstack.remove(id);
+    app.store.callstack.remove(id.toString());
 });
 
 app.store.code.on('callback:spawn', function (data) {
+    var webapi = app.store.apis.get(data.apiId);
+
+    if (webapi) {
+        webapi.trigger('callback:spawned', webapi);
+    }
     app.store.queue.add(data);
 });
 

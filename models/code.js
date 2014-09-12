@@ -115,13 +115,17 @@ module.exports = AmpersandState.extend({
             $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
             consolePlugin.createClient(this, this.worker);
 
+            var invocations = {};
             this.worker
                     .on('node:before', function (node) {
-                        self.trigger('node:will-run', node.id, self.nodeSourceCode[node.id]);
+                        invocations[node.id] = invocations[node.id] || 0;
+                        invocations[node.id]++;
+
+                        self.trigger('node:will-run', node.id, self.nodeSourceCode[node.id], invocations[node.id]);
                         //$('#node-' + node.id).addClass('running');
                     })
                     .on('node:after', function (node) {
-                        self.trigger('node:did-run', node.id);
+                        self.trigger('node:did-run', node.id, invocations[node.id]);
                         //$('#node-' + node.id).removeClass('running');
                     })
                     .on('timeout:created', function (timer) {
@@ -152,9 +156,10 @@ module.exports = AmpersandState.extend({
 var instrumentAndWrapHTML = function (code) {
     var instrumented = instrumentCode(code, {
         before: function (id, node) {
+            var source = JSON.stringify(node.source());
             return deval(function (id, type, source) {
                 weevil.send('node:before', { id: $id$, type: "$type$", source: $source$ }), delay()
-            }, id, node.type, JSON.stringify(node.source()));
+            }, id, node.type, source);
         },
         after: function (id, node) {
             return deval(function (id) {

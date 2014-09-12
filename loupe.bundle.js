@@ -100,8 +100,13 @@ module.exports = React.createClass({displayName: 'exports',
 
 module.exports = React.createClass({displayName: 'exports',
     render: function () {
+        var classes = "stack-item";
+        if (this.props.isCallback) {
+            classes += " stack-item-callback";
+        }
+
         return (
-            React.DOM.div({className: "stack-item"}, 
+            React.DOM.div({className: classes}, 
                 this.props.children
             )
         );
@@ -109,7 +114,8 @@ module.exports = React.createClass({displayName: 'exports',
 });
 
 },{"react":217}],4:[function(require,module,exports){
-/** @jsx React.DOM */var React = require('react');
+/** @jsx React.DOM */var React = require('react/addons');
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 var CallStackItem = require('./call-stack-item.jsx');
 var EventsMixin = require('react-backbone-events-mixin');
 
@@ -137,20 +143,22 @@ module.exports = React.createClass({displayName: 'exports',
         var calls = [];
 
         this.state.stack.each(function (call) {
-            calls.unshift(CallStackItem({key: call.id}, call.code));
+            calls.unshift(CallStackItem({key: call.id, isCallback: call.isCallback}, call.code));
         });
 
         return (
             React.DOM.div({className: "stack-wrapper flexChild"}, 
                 React.DOM.div({className: "stack"}, 
-                  calls
+                  ReactCSSTransitionGroup({transitionName: "tr-stack"}, 
+                    calls
+                  )
                 )
             )
         );
     }
 });
 
-},{"./call-stack-item.jsx":3,"react":217,"react-backbone-events-mixin":54}],5:[function(require,module,exports){
+},{"./call-stack-item.jsx":3,"react-backbone-events-mixin":54,"react/addons":58}],5:[function(require,module,exports){
 /** @jsx React.DOM *//* JSX: React.DOM */
 
 var React = require('react/addons');
@@ -422,6 +430,27 @@ module.exports = React.createClass({displayName: 'exports',
 /** @jsx React.DOM */var React = require('react');
 
 module.exports = React.createClass({displayName: 'exports',
+    flash: function () {
+        var el = this.getDOMNode();
+        el.classList.add('tr-webapi-spawn');
+        setTimeout(function () {
+            el.classList.add('tr-webapi-spawn-active');
+        }, 16.6);
+
+        var onTransitionOutEnd = function () {
+            el.classList.remove('tr-webapi-spawn');
+            el.removeEventListener('transitionend', onTransitionOutEnd, false);
+        };
+
+        var onTransitionInEnd = function () {
+            el.classList.remove('tr-webapi-spawn-active');
+            el.removeEventListener('transitionend', onTransitionInEnd, false);
+            el.addEventListener('transitionend', onTransitionOutEnd, false);
+        };
+
+        el.addEventListener('transitionend', onTransitionInEnd, false);
+    },
+
     render: function () {
         return (
             React.DOM.div({className: "webapi webapi-query"}, 
@@ -459,10 +488,11 @@ module.exports = React.createClass({displayName: 'exports',
 });
 
 },{"react":217}],12:[function(require,module,exports){
-/** @jsx React.DOM */var React = require('react');
+/** @jsx React.DOM */var React = require('react/addons');
 var WebApiTimer = require('./web-api-timer.jsx');
 var WebApiQuery = require('./web-api-query.jsx');
 var EventMixin = require('react-backbone-events-mixin');
+var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
 
 module.exports = React.createClass({displayName: 'exports',
     mixins: [
@@ -472,6 +502,11 @@ module.exports = React.createClass({displayName: 'exports',
     registerListeners: function (props, state) {
         this.listenTo(state.apis, 'all', function () {
             this.forceUpdate();
+        }.bind(this));
+
+        this.listenTo(state.apis, 'callback:spawned', function (model) {
+            this.refs[model.id].flash();
+            console.log(this.refs);
         }.bind(this));
     },
 
@@ -484,11 +519,11 @@ module.exports = React.createClass({displayName: 'exports',
     render: function () {
         var apis = this.state.apis.map(function (api) {
             if (api.type === 'timeout') {
-                return WebApiTimer({timeout: api.timeoutString, key: api.id}, api.code);
+                return WebApiTimer({timeout: api.timeoutString, key: api.id, ref: api.id}, api.code);
             }
             if (api.type === 'query') {
                 return (
-                    WebApiQuery({key: api.id}, 
+                    WebApiQuery({key: api.id, ref: api.id}, 
                         api.code
                     )
                 );
@@ -497,13 +532,15 @@ module.exports = React.createClass({displayName: 'exports',
 
         return (
           React.DOM.div({className: "webapis flexChild"}, 
-            apis
+            ReactCSSTransitionGroup({transitionName: "tr-webapis"}, 
+              apis
+            )
           )
         )
     }
 });
 
-},{"./web-api-query.jsx":10,"./web-api-timer.jsx":11,"react":217,"react-backbone-events-mixin":54}],13:[function(require,module,exports){
+},{"./web-api-query.jsx":10,"./web-api-timer.jsx":11,"react-backbone-events-mixin":54,"react/addons":58}],13:[function(require,module,exports){
 module.exports = function (delay) {
     return function () {
         var start = new Date().getTime();
@@ -680,6 +717,7 @@ module.exports.createClient = function (codeModel, emitter, document) {
                 var callbackId = data.id + ":" + Date.now();
                 codeModel.trigger('callback:spawn', {
                     id: callbackId,
+                    apiId: data.id,
                     code: "click"
                 });
                 emitter.send('query:event', data.id, callbackId);
@@ -794,14 +832,25 @@ module.exports = function (code, insertionPoints, options) {
     var cursor = new TextCursor(code);
     var output = '';
 
+    var currentNodeContents = {
+    };
+
     insertionPoints.forEach(function (point) {
         var wrappedCode = cursor.stepTo(point.loc);
         output += wrappedCode;
+
+        Object.keys(currentNodeContents).forEach(function (id) {
+            currentNodeContents[id] += wrappedCode;
+        });
+
         if (point.type === 'start') {
             output += before(point.id);
+            currentNodeContents[point.id] = '';
         }
+
         if (point.type === 'end') {
-            withWrappedCode(point.id, wrappedCode);
+            withWrappedCode(point.id, currentNodeContents[point.id]);
+            delete currentNodeContents[point.id];
 
             output += after(point.id);
         }
@@ -851,14 +900,15 @@ app.store.code.on('change:encodedSource', function () {
 //    console.log('Code event', arguments);
 //});
 
-app.store.code.on('node:will-run', function (id, source) {
+app.store.code.on('node:will-run', function (id, source, invocation) {
     app.store.callstack.add({
-        id: id, code: source
+        id: id + ':' + invocation,
+        code: source
     });
 });
 
-app.store.code.on('node:did-run', function (id) {
-    app.store.callstack.remove(id);
+app.store.code.on('node:did-run', function (id, invocation) {
+    app.store.callstack.remove(id + ':' + invocation);
 });
 
 app.store.code.on('webapi:started', function (data) {
@@ -872,17 +922,23 @@ app.store.code.on('callback:shifted', function (id) {
     }
 
     app.store.callstack.add({
-        id: callback.id,
-        code: callback.code
+        id: callback.id.toString(),
+        code: callback.code,
+        isCallback: true
     });
     app.store.queue.remove(callback);
 });
 
 app.store.code.on('callback:completed', function (id) {
-    app.store.callstack.remove(id);
+    app.store.callstack.remove(id.toString());
 });
 
 app.store.code.on('callback:spawn', function (data) {
+    var webapi = app.store.apis.get(data.apiId);
+
+    if (webapi) {
+        webapi.trigger('callback:spawned', webapi);
+    }
     app.store.queue.add(data);
 });
 
@@ -1112,13 +1168,17 @@ module.exports = AmpersandState.extend({
             $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
             consolePlugin.createClient(this, this.worker);
 
+            var invocations = {};
             this.worker
                     .on('node:before', function (node) {
-                        self.trigger('node:will-run', node.id, self.nodeSourceCode[node.id]);
+                        invocations[node.id] = invocations[node.id] || 0;
+                        invocations[node.id]++;
+
+                        self.trigger('node:will-run', node.id, self.nodeSourceCode[node.id], invocations[node.id]);
                         //$('#node-' + node.id).addClass('running');
                     })
                     .on('node:after', function (node) {
-                        self.trigger('node:did-run', node.id);
+                        self.trigger('node:did-run', node.id, invocations[node.id]);
                         //$('#node-' + node.id).removeClass('running');
                     })
                     .on('timeout:created', function (timer) {
@@ -1149,9 +1209,10 @@ module.exports = AmpersandState.extend({
 var instrumentAndWrapHTML = function (code) {
     var instrumented = instrumentCode(code, {
         before: function (id, node) {
+            var source = JSON.stringify(node.source());
             return deval(function (id, type, source) {
                 weevil.send('node:before', { id: $id$, type: "$type$", source: $source$ }), delay()
-            }, id, node.type, JSON.stringify(node.source()));
+            }, id, node.type, source);
         },
         after: function (id, node) {
             return deval(function (id) {

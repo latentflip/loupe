@@ -3,11 +3,12 @@ var AndModel = require('ampersand-model');
 module.exports = AndModel.extend({
     type: 'stack-frame',
     props: {
-        id: 'number',
+        id: 'string',
         nodeId: 'number',
         source: 'string',
         expressionType: 'string',
-        createdAt: 'number'
+        createdAt: 'number',
+        isCallback: ['boolean', true, false]
     },
     initialize: function () {
         this.id = Math.floor(Math.random() * 10000000);
