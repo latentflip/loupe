@@ -71,12 +71,6 @@ module.exports = AmpersandState.extend({
                 return this.instrumented.code;
             }
         },
-        //workerCode: {
-        //    deps: ['runnableCode', 'delay'],
-        //    fn: function () {
-        //        return makeWorkerCode(this.runnableCode, this.delay);
-        //    }
-        //},
         nodeSourceCode: {
             deps: ['instrumented'],
             fn: function () {
@@ -85,9 +79,10 @@ module.exports = AmpersandState.extend({
         }
     },
 
-    makeWorkerCode: function () {
+    makeWorkerCode: function (fromId) {
         return makeWorkerCode(this.runnableCode, {
-            delay: this.delay
+            delay: this.delay,
+            resumeFromDelayId: fromId
         });
     },
 
@@ -110,15 +105,28 @@ module.exports = AmpersandState.extend({
         if (this.worker) { this.worker.kill(); }
     },
 
-    run: function () {
+    pause: function () {
+        console.log('Paused at', this.currentExecution);
+        this.pausedExecution = this.currentExecution;
+        this.worker.kill();
+    },
+
+    resume: function () {
+        console.log('Resuming from', this.pausedExecution);
+        this.run(this.pausedExecution);
+    },
+
+    run: function (fromId) {
         this.trigger('ready-to-run');
 
         setTimeout(function () {
             var self = this;
 
-            this.resetEverything();
+            if (!fromId) {
+                this.resetEverything();
+            }
 
-            this.worker = weevil(this.makeWorkerCode());
+            this.worker = weevil(this.makeWorkerCode(fromId));
 
             //TODO this shouldn't know about the scratchpad
             $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
@@ -157,7 +165,11 @@ module.exports = AmpersandState.extend({
                     })
                     .on('callback:completed', function (callbackId) {
                         self.trigger('callback:completed', callbackId);
+                    })
+                    .on('delay', function (delayId) {
+                        self.currentExecution = delayId;
                     });
+
         }.bind(this), 0);
     }
 });
@@ -205,11 +217,13 @@ function prependCode(prepend, code) {
     return prepend + ';\n' + code;
 }
 
-var makeWorkerCode = function (code, options) {
-    code = prependCode(deval(function (delayMaker, delayTime) {
+var makeWorkerCode = function (code, fromId) {
+    code = prependCode(deval(function (delayMaker, delayTime, fromId) {
+        var loupe = {};
+
         var delayMaker = $delayMaker$;
 
-        var delay = delayMaker($delayTime$);
+        var delay = delayMaker($delayTime$, $fromId$);
 
         //Override setTimeout
         var _setTimeout = self.setTimeout;
@@ -239,7 +253,7 @@ var makeWorkerCode = function (code, options) {
             weevil.send('timeout:created', data);
         };
 
-    }, delay.toString(), options.delay), code);
+    }, delay.toString(), options.delay, fromId ? fromId.toString() : "null"), code);
 
     code = $.prependWorkerCode(code);
     code = consolePlugin.prependWorkerCode(code);

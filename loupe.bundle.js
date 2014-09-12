@@ -289,6 +289,14 @@ module.exports = React.createClass({displayName: 'exports',
         this.state.code.run();
     },
 
+    pauseCode: function () {
+        this.state.code.pause();
+    },
+
+    resumeCode: function () {
+        this.state.code.resume();
+    },
+
     onEditFocus: function () {
         this.state.code.resetEverything();
         this.setState({ editing: true });
@@ -317,7 +325,9 @@ module.exports = React.createClass({displayName: 'exports',
                 React.DOM.div({className: "flexChild columnParent"}, 
                     React.DOM.div({className: "editor-switch"}, 
                         React.DOM.button({onClick: this.onEditFocus}, "Edit"), 
-                        React.DOM.button({onClick: this.runCode}, "Rerun")
+                        React.DOM.button({onClick: this.runCode}, "Rerun"), 
+                        React.DOM.button({onClick: this.pauseCode}, "Pause"), 
+                        React.DOM.button({onClick: this.resumeCode}, "Resume")
                     ), 
                     React.DOM.div({
                       className: "editor flexChild", 
@@ -599,17 +609,47 @@ module.exports = React.createClass({displayName: 'exports',
 });
 
 },{"./web-api-query.jsx":11,"./web-api-timer.jsx":12,"react-backbone-events-mixin":55,"react/addons":59}],14:[function(require,module,exports){
-module.exports = function (delay) {
-    return function () {
-        var start = new Date().getTime();
-        var target = start + delay;
+module.exports = function (delay, fromId) {
+    var microDelay = 15;
+    var id = 0;
+    if (fromId) { loupe.skipDelays = true; }
+    var nMicroDelays = delay / microDelay;
 
-        while (new Date().getTime() < target) {
-            Math.pow(2, 20);
+    return function () {
+        id++;
+        var microId = 0;
+        var start, target;
+        var countdown = Math.floor(nMicroDelays);
+
+        //var wasSkipping = loupe.skipDelays;
+        //var startedAt = new Date().getTime();
+        while (countdown--) {
+            weevil.send('delay', id + microId);
+
+            if (!fromId || (id + microId) > fromId) { 
+                loupe.skipDelays = false;
+
+                start = new Date().getTime();
+                target = start + microDelay;
+                while (new Date().getTime() < target) {
+                    //no-op
+                }
+            }
+
+            microId += 0.000001;
         }
+        //var actual = new Date().getTime() - startedAt;
+        //if (loupe.skipDelays) {
+        //    console.log(['Skipped', id, 'in', actual]);
+        //} else {
+        //    if (wasSkipping) {
+        //        console.log([id, 'Partial!', delay, 'actual', actual, 'error', actual - delay]);
+        //    } else {
+        //        console.log([id, 'Target', delay, 'actual', actual, 'error', actual - delay]);
+        //    }
+        //}
     };
 };
-
 
 },{}],15:[function(require,module,exports){
 var falafel = require('falafel');
@@ -705,6 +745,8 @@ module.exports.server = deval(function () {
     var _console = {};
 
     _console.log = function () {
+        if (loupe.paused) return;
+
         weevil.send('console:log', [].slice.call(arguments));
     };
 });
@@ -1192,12 +1234,6 @@ module.exports = AmpersandState.extend({
                 return this.instrumented.code;
             }
         },
-        //workerCode: {
-        //    deps: ['runnableCode', 'delay'],
-        //    fn: function () {
-        //        return makeWorkerCode(this.runnableCode, this.delay);
-        //    }
-        //},
         nodeSourceCode: {
             deps: ['instrumented'],
             fn: function () {
@@ -1206,9 +1242,10 @@ module.exports = AmpersandState.extend({
         }
     },
 
-    makeWorkerCode: function () {
+    makeWorkerCode: function (fromId) {
         return makeWorkerCode(this.runnableCode, {
-            delay: this.delay
+            delay: this.delay,
+            resumeFromDelayId: fromId
         });
     },
 
@@ -1231,15 +1268,28 @@ module.exports = AmpersandState.extend({
         if (this.worker) { this.worker.kill(); }
     },
 
-    run: function () {
+    pause: function () {
+        console.log('Paused at', this.currentExecution);
+        this.pausedExecution = this.currentExecution;
+        this.worker.kill();
+    },
+
+    resume: function () {
+        console.log('Resuming from', this.pausedExecution);
+        this.run(this.pausedExecution);
+    },
+
+    run: function (fromId) {
         this.trigger('ready-to-run');
 
         setTimeout(function () {
             var self = this;
 
-            this.resetEverything();
+            if (!fromId) {
+                this.resetEverything();
+            }
 
-            this.worker = weevil(this.makeWorkerCode());
+            this.worker = weevil(this.makeWorkerCode(fromId));
 
             //TODO this shouldn't know about the scratchpad
             $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
@@ -1278,7 +1328,11 @@ module.exports = AmpersandState.extend({
                     })
                     .on('callback:completed', function (callbackId) {
                         self.trigger('callback:completed', callbackId);
+                    })
+                    .on('delay', function (delayId) {
+                        self.currentExecution = delayId;
                     });
+
         }.bind(this), 0);
     }
 });
@@ -1326,11 +1380,13 @@ function prependCode(prepend, code) {
     return prepend + ';\n' + code;
 }
 
-var makeWorkerCode = function (code, options) {
-    code = prependCode(deval(function (delayMaker, delayTime) {
+var makeWorkerCode = function (code, fromId) {
+    code = prependCode(deval(function (delayMaker, delayTime, fromId) {
+        var loupe = {};
+
         var delayMaker = $delayMaker$;
 
-        var delay = delayMaker($delayTime$);
+        var delay = delayMaker($delayTime$, $fromId$);
 
         //Override setTimeout
         var _setTimeout = self.setTimeout;
@@ -1360,7 +1416,7 @@ var makeWorkerCode = function (code, options) {
             weevil.send('timeout:created', data);
         };
 
-    }, delay.toString(), options.delay), code);
+    }, delay.toString(), options.delay, fromId ? fromId.toString() : "null"), code);
 
     code = $.prependWorkerCode(code);
     code = consolePlugin.prependWorkerCode(code);

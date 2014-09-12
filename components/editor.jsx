@@ -54,6 +54,14 @@ module.exports = React.createClass({
         this.state.code.run();
     },
 
+    pauseCode: function () {
+        this.state.code.pause();
+    },
+
+    resumeCode: function () {
+        this.state.code.resume();
+    },
+
     onEditFocus: function () {
         this.state.code.resetEverything();
         this.setState({ editing: true });
@@ -83,6 +91,8 @@ module.exports = React.createClass({
                     <div className='editor-switch'>
                         <button onClick={this.onEditFocus}>Edit</button>
                         <button onClick={this.runCode}>Rerun</button>
+                        <button onClick={this.pauseCode}>Pause</button>
+                        <button onClick={this.resumeCode}>Resume</button>
                     </div>
                     <div
                       className="editor flexChild"
