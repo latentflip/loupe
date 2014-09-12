@@ -29,7 +29,7 @@ module.exports = React.createClass({
         });
 
         return (
-          <div className="callback-queue">
+          <div className="callback-queue flexChild">
             <ReactCSSTransitionGroup transitionName="tr-queue">
                 {queue}
             </ReactCSSTransitionGroup>

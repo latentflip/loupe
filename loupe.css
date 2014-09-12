@@ -293,6 +293,8 @@ body {
 
 
 .callback-queue {
+  margin-bottom: 20px;
+  margin-right: 20px;
 }
 
 .callback {
@@ -311,18 +313,62 @@ body {
 
 .stackBox {
   position: relative;
+  margin-right: 20px;
+}
+
+.stack-wrapper {
+  width: 244px;
+  padding: 20px;
+  margin-bottom: 86px;
+  margin-top: 20px;
+}
+
+.stack-wrapper, .callback-queue, .webapis {
+  border: 2px #ddd dashed;
+  position: relative;
+  padding: 25px 10px 10px 10px;
+}
+
+.stack-wrapper:before,
+.callback-queue:before,
+.webapis:before {
+  font-family: Helvetica Neue, Arial, sans-serif;
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 5px;
+  color: #999;
+}
+
+.webapis {
+  margin-top: 20px;
+  margin-bottom: 86px;
+  margin-right: 20px;
+}
+
+.webapis:before {
+  content: "Web Apis";
+}
+
+.stack-wrapper:before {
+  content: "Call Stack";
+}
+
+.callback-queue:before {
+  content: "Call Stack";
 }
 
 .stack {
   position: absolute;
-  bottom: 86px;
+  bottom: 0px;
   left: 0;
+  padding-left: 10px;
 }
 .stackBox > .spinner-wrapper {
   position: absolute;
   bottom: 0;
   left: 0;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .stack-item {
@@ -330,7 +376,7 @@ body {
   padding: 10px;
   margin: 5px;
   border: 2px #ddd solid;
-  width: 200px;
+  width: 220px;
   margin: 10px auto;
 }
 
@@ -343,7 +389,7 @@ body {
   -webkit-transform: rotate(0deg);
       -ms-transform: rotate(0deg);
           transform: rotate(0deg);
-  margin-left: 62px;
+  margin-left: 82px;
 }
 
 .spinner-wrapper-transition {

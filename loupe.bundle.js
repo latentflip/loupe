@@ -73,19 +73,19 @@ module.exports = React.createClass({displayName: 'exports',
 
               React.DOM.div({className: "flexChild columnParent"}, 
                 React.DOM.div({className: "flexChild rowParent stackRow"}, 
-                  React.DOM.div({className: "flexChild stackBox"}, 
+                  React.DOM.div({className: "stackBox columnParent"}, 
 
                     CallStack(null), 
 
                     EventLoopSpinner(null)
                   ), 
 
-                  React.DOM.div({className: "flexChild"}, 
+                  React.DOM.div({className: "flexChild columnParent"}, 
                     WebApis(null)
                   )
                 ), 
 
-                React.DOM.div({className: "flexChild callbackRow"}, 
+                React.DOM.div({className: "flexChild callbackRow columnParent"}, 
                   CallbackQueue(null)
                 )
               )
@@ -141,8 +141,10 @@ module.exports = React.createClass({displayName: 'exports',
         });
 
         return (
-            React.DOM.div({className: "stack"}, 
-              calls
+            React.DOM.div({className: "stack-wrapper flexChild"}, 
+                React.DOM.div({className: "stack"}, 
+                  calls
+                )
             )
         );
     }
@@ -180,7 +182,7 @@ module.exports = React.createClass({displayName: 'exports',
         });
 
         return (
-          React.DOM.div({className: "callback-queue"}, 
+          React.DOM.div({className: "callback-queue flexChild"}, 
             ReactCSSTransitionGroup({transitionName: "tr-queue"}, 
                 queue
             )
@@ -254,6 +256,10 @@ module.exports = React.createClass({displayName: 'exports',
 
     saveAndRunCode: function () {
         this.setState({ editing: false });
+        this.runCode();
+    },
+
+    runCode: function () {
         this.state.code.run();
     },
 
@@ -284,7 +290,8 @@ module.exports = React.createClass({displayName: 'exports',
             return (
                 React.DOM.div({className: "flexChild columnParent"}, 
                     React.DOM.div({className: "editor-switch"}, 
-                        React.DOM.button({onClick: this.onEditFocus}, "Edit")
+                        React.DOM.button({onClick: this.onEditFocus}, "Edit"), 
+                        React.DOM.button({onClick: this.runCode}, "Rerun")
                     ), 
                     React.DOM.div({
                       className: "editor flexChild", 
@@ -489,7 +496,7 @@ module.exports = React.createClass({displayName: 'exports',
         });
 
         return (
-          React.DOM.div(null, 
+          React.DOM.div({className: "webapis flexChild"}, 
             apis
           )
         )
@@ -527,7 +534,7 @@ var instruments = {
     //},
     CallExpression: function (id, node, before, after) {
         var source = node.source();
-            
+
         if (node.callee.source() === 'console.log') {
             source = "_console.log(" + node.loc.start.line + ", " + node.arguments.map(call('source')).join(', ') + ")";
         }
@@ -640,6 +647,7 @@ module.exports.server = deval(function () {
 
             this._callbacks[id] = function (callbackId) {
                 self.emitter.send('callback:shifted', callbackId);
+                delay();
                 cb();
                 self.emitter.send('callback:completed', callbackId);
             };
@@ -1201,6 +1209,7 @@ var makeWorkerCode = function (code) {
                 data.error = (data.started - data.queued) - timeout;
                 delay();
                 weevil.send('timeout:started', data);
+                delay();
 
                 fn.apply(fn, arguments);
 

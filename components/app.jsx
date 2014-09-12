@@ -26,19 +26,19 @@ module.exports = React.createClass({
 
               <div className="flexChild columnParent">
                 <div className="flexChild rowParent stackRow">
-                  <div className="flexChild stackBox">
+                  <div className="stackBox columnParent">
 
                     <CallStack />
 
                     <EventLoopSpinner />
                   </div>
 
-                  <div className="flexChild">
+                  <div className="flexChild columnParent">
                     <WebApis/>
                   </div>
                 </div>
 
-                <div className="flexChild callbackRow">
+                <div className="flexChild callbackRow columnParent">
                   <CallbackQueue />
                 </div>
               </div>

@@ -30,8 +30,10 @@ module.exports = React.createClass({
         });
 
         return (
-            <div className="stack">
-              {calls}
+            <div className="stack-wrapper flexChild">
+                <div className="stack">
+                  {calls}
+                </div>
             </div>
         );
     }

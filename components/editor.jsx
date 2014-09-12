@@ -47,6 +47,10 @@ module.exports = React.createClass({
 
     saveAndRunCode: function () {
         this.setState({ editing: false });
+        this.runCode();
+    },
+
+    runCode: function () {
         this.state.code.run();
     },
 
@@ -78,6 +82,7 @@ module.exports = React.createClass({
                 <div className="flexChild columnParent">
                     <div className='editor-switch'>
                         <button onClick={this.onEditFocus}>Edit</button>
+                        <button onClick={this.runCode}>Rerun</button>
                     </div>
                     <div
                       className="editor flexChild"
