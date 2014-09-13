@@ -537,7 +537,9 @@ module.exports = React.createClass({displayName: 'exports',
     render: function () {
         var animStyle = {
             animationDuration: this.props.timeout,
-            WebkitAnimationDuration: this.props.timeout
+            WebkitAnimationDuration: this.props.timeout,
+            animationPlayState: this.props.playState,
+            WebkitAnimationPlayState: this.props.playState
         };
 
         return (
@@ -587,7 +589,7 @@ module.exports = React.createClass({displayName: 'exports',
     render: function () {
         var apis = this.state.apis.map(function (api) {
             if (api.type === 'timeout') {
-                return WebApiTimer({timeout: api.timeoutString, key: api.id, ref: api.id}, api.code);
+                return WebApiTimer({timeout: api.timeoutString, key: api.id, ref: api.id, playState: api.playState}, api.code);
             }
             if (api.type === 'query') {
                 return (
@@ -1041,7 +1043,8 @@ app.store.code.on('callback:shifted', function (id) {
 });
 
 app.store.code.on('callback:completed', function (id) {
-    app.store.callstack.remove(id.toString());
+    //app.store.callstack.remove(id.toString());
+    app.store.callstack.pop();
 });
 
 app.store.code.on('callback:spawn', function (data) {
@@ -1063,6 +1066,13 @@ app.store.code.on('reset-everything', function () {
     app.store.apis.reset();
 });
 
+app.store.code.on('paused', function () {
+    app.store.apis.pause();
+});
+
+app.store.code.on('resumed', function () {
+    app.store.apis.resume();
+});
 
 //app.store.apis.add([
 //    { id: '1', type: 'timeout', timeout: 5000, code: "foo();" },
@@ -1085,10 +1095,14 @@ var Timeout = AmpersandState.extend({
         id: ['string'],
         type: ['string', true, 'timeout'],
         timeout: ['number', true, 0],
-        code: 'string'
+        code: 'string',
+        playState: ['string', true, 'running']
     },
     session: {
-        timeoutId: 'number'
+        timeoutId: 'number',
+        startedAt: 'number',
+        pausedAt: 'number',
+        remainingTime: 'number'
     },
     derived: {
         timeoutString: {
@@ -1098,18 +1112,46 @@ var Timeout = AmpersandState.extend({
             }
         }
     },
-    initialize: function () {
+
+    pause: function () {
+        this.pausedAt = Date.now();
+        this.remainingTime = this.remainingTime - (this.pausedAt - this.startedAt);
+        this.playState = 'paused';
+        clearTimeout(this.timeoutId);
+    },
+
+    resume: function () {
+        this.startedAt = Date.now();
+        this.playState = 'running';
+
         this.timeoutId = setTimeout(function () {
             this.trigger('callback:spawn', {
                 id: this.id,
                 code: this.code
             });
             this.collection.remove(this);
-        }.bind(this), this.timeout);
+        }.bind(this), this.remainingTime);
+    },
+
+    initialize: function () {
+        this.startedAt = Date.now();
+        this.remainingTime = this.timeout;
+
+        this.timeoutId = setTimeout(function () {
+            this.trigger('callback:spawn', {
+                id: this.id,
+                code: this.code
+            });
+            this.collection.remove(this);
+        }.bind(this), this.remainingTime);
 
         this.on('remove', function () {
             clearTimeout(this.timeoutId);
         }.bind(this));
+    },
+
+    getPausedState: function () {
+        return { remainingTime: this.remainingTime };
     }
 });
 
@@ -1127,6 +1169,10 @@ var Query = AmpersandState.extend({
             return "$.on('" + this.selector + "', '" + this.event + "', ...)";
             }
         }
+    },
+    pause: function () {
+    },
+    resume: function () {
     }
 });
 
@@ -1139,6 +1185,19 @@ module.exports = AmpersandCollection.extend({
             return new Query(props, opts);
         }
         throw 'Unknown prop type: ' + props.type;
+    },
+    pause: function () {
+        this.each(function (model) { model.pause(); });
+    },
+    resume: function () {
+        this.each(function (model) { model.resume(); });
+    },
+    getPausedState: function () {
+        var data = {};
+        this.each(function (model) {
+            data[model.id] = model.getPausedState();
+        });
+        return data;
     }
 });
 
@@ -1270,10 +1329,11 @@ module.exports = AmpersandState.extend({
         }
     },
 
-    makeWorkerCode: function (fromId) {
+    makeWorkerCode: function (fromId, apiState) {
         return makeWorkerCode(this.runnableCode, {
             delay: this.delay,
-            resumeFromDelayId: fromId
+            resumeFromDelayId: fromId,
+            apiState: apiState
         });
     },
 
@@ -1297,16 +1357,21 @@ module.exports = AmpersandState.extend({
     },
 
     pause: function () {
+        this.trigger('paused');
         this.pausedExecution = this.currentExecution;
         this.worker.kill();
     },
 
     resume: function () {
+        this.trigger('resumed');
+        var webapiState = app.store.apis.getPausedState();
+
         this.ignoreEvents = true;
-        this.run(this.pausedExecution);
+        this.run(this.pausedExecution, webapiState);
     },
 
-    run: function (fromId) {
+    run: function (fromId, apiState) {
+        apiState = apiState || {};
         this.trigger('ready-to-run');
 
         setTimeout(function () {
@@ -1316,7 +1381,7 @@ module.exports = AmpersandState.extend({
                 this.resetEverything();
             }
 
-            this.worker = weevil(this.makeWorkerCode(fromId));
+            this.worker = weevil(this.makeWorkerCode(fromId, apiState));
 
             //TODO this shouldn't know about the scratchpad
             $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
@@ -1410,9 +1475,11 @@ function prependCode(prepend, code) {
 var makeWorkerCode = function (code, options) {
     var delayTime = options.delay;
     var resumeFromDelayId = options.resumeFromDelayId ? options.resumeFromDelayId.toString() : "null";
+    var apiState = JSON.stringify(options.apiState || {});
 
-    code = prependCode(deval(function (delayMaker, delayTime, resumeFromDelayId) {
+    code = prependCode(deval(function (delayMaker, delayTime, resumeFromDelayId, apiState) {
         var loupe = {};
+        loupe.apiState = $apiState$;
 
         var _send = weevil.send;
         weevil.send = function (name) {
@@ -1448,11 +1515,16 @@ var makeWorkerCode = function (code, options) {
                 delay();
             });
 
+            if (loupe.apiState[timerId]) {
+                console.log('Overriding ' + args[1] + ' to ' + loupe.apiState[timerId].remainingTime);
+                args[1] = loupe.apiState[timerId].remainingTime;
+            }
+
             data.id = _setTimeout.apply(self, args);
             weevil.send('timeout:created', data);
         };
 
-    }, delayMaker.toString(), delayTime, resumeFromDelayId), code);
+    }, delayMaker.toString(), delayTime, resumeFromDelayId, apiState), code);
 
     code = $.prependWorkerCode(code);
     code = consolePlugin.prependWorkerCode(code);

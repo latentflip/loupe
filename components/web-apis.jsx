@@ -29,7 +29,7 @@ module.exports = React.createClass({
     render: function () {
         var apis = this.state.apis.map(function (api) {
             if (api.type === 'timeout') {
-                return <WebApiTimer timeout={api.timeoutString} key={api.id} ref={api.id}>{api.code}</WebApiTimer>;
+                return <WebApiTimer timeout={api.timeoutString} key={api.id} ref={api.id} playState={api.playState}>{api.code}</WebApiTimer>;
             }
             if (api.type === 'query') {
                 return (

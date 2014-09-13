@@ -68,7 +68,8 @@ app.store.code.on('callback:shifted', function (id) {
 });
 
 app.store.code.on('callback:completed', function (id) {
-    app.store.callstack.remove(id.toString());
+    //app.store.callstack.remove(id.toString());
+    app.store.callstack.pop();
 });
 
 app.store.code.on('callback:spawn', function (data) {
@@ -90,6 +91,13 @@ app.store.code.on('reset-everything', function () {
     app.store.apis.reset();
 });
 
+app.store.code.on('paused', function () {
+    app.store.apis.pause();
+});
+
+app.store.code.on('resumed', function () {
+    app.store.apis.resume();
+});
 
 //app.store.apis.add([
 //    { id: '1', type: 'timeout', timeout: 5000, code: "foo();" },

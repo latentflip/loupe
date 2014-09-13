@@ -6,10 +6,14 @@ var Timeout = AmpersandState.extend({
         id: ['string'],
         type: ['string', true, 'timeout'],
         timeout: ['number', true, 0],
-        code: 'string'
+        code: 'string',
+        playState: ['string', true, 'running']
     },
     session: {
-        timeoutId: 'number'
+        timeoutId: 'number',
+        startedAt: 'number',
+        pausedAt: 'number',
+        remainingTime: 'number'
     },
     derived: {
         timeoutString: {
@@ -19,18 +23,46 @@ var Timeout = AmpersandState.extend({
             }
         }
     },
-    initialize: function () {
+
+    pause: function () {
+        this.pausedAt = Date.now();
+        this.remainingTime = this.remainingTime - (this.pausedAt - this.startedAt);
+        this.playState = 'paused';
+        clearTimeout(this.timeoutId);
+    },
+
+    resume: function () {
+        this.startedAt = Date.now();
+        this.playState = 'running';
+
         this.timeoutId = setTimeout(function () {
             this.trigger('callback:spawn', {
                 id: this.id,
                 code: this.code
             });
             this.collection.remove(this);
-        }.bind(this), this.timeout);
+        }.bind(this), this.remainingTime);
+    },
+
+    initialize: function () {
+        this.startedAt = Date.now();
+        this.remainingTime = this.timeout;
+
+        this.timeoutId = setTimeout(function () {
+            this.trigger('callback:spawn', {
+                id: this.id,
+                code: this.code
+            });
+            this.collection.remove(this);
+        }.bind(this), this.remainingTime);
 
         this.on('remove', function () {
             clearTimeout(this.timeoutId);
         }.bind(this));
+    },
+
+    getPausedState: function () {
+        return { remainingTime: this.remainingTime };
     }
 });
 
@@ -48,6 +80,10 @@ var Query = AmpersandState.extend({
             return "$.on('" + this.selector + "', '" + this.event + "', ...)";
             }
         }
+    },
+    pause: function () {
+    },
+    resume: function () {
     }
 });
 
@@ -60,5 +96,18 @@ module.exports = AmpersandCollection.extend({
             return new Query(props, opts);
         }
         throw 'Unknown prop type: ' + props.type;
+    },
+    pause: function () {
+        this.each(function (model) { model.pause(); });
+    },
+    resume: function () {
+        this.each(function (model) { model.resume(); });
+    },
+    getPausedState: function () {
+        var data = {};
+        this.each(function (model) {
+            data[model.id] = model.getPausedState();
+        });
+        return data;
     }
 });

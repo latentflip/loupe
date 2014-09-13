@@ -79,10 +79,11 @@ module.exports = AmpersandState.extend({
         }
     },
 
-    makeWorkerCode: function (fromId) {
+    makeWorkerCode: function (fromId, apiState) {
         return makeWorkerCode(this.runnableCode, {
             delay: this.delay,
-            resumeFromDelayId: fromId
+            resumeFromDelayId: fromId,
+            apiState: apiState
         });
     },
 
@@ -106,16 +107,21 @@ module.exports = AmpersandState.extend({
     },
 
     pause: function () {
+        this.trigger('paused');
         this.pausedExecution = this.currentExecution;
         this.worker.kill();
     },
 
     resume: function () {
+        this.trigger('resumed');
+        var webapiState = app.store.apis.getPausedState();
+
         this.ignoreEvents = true;
-        this.run(this.pausedExecution);
+        this.run(this.pausedExecution, webapiState);
     },
 
-    run: function (fromId) {
+    run: function (fromId, apiState) {
+        apiState = apiState || {};
         this.trigger('ready-to-run');
 
         setTimeout(function () {
@@ -125,7 +131,7 @@ module.exports = AmpersandState.extend({
                 this.resetEverything();
             }
 
-            this.worker = weevil(this.makeWorkerCode(fromId));
+            this.worker = weevil(this.makeWorkerCode(fromId, apiState));
 
             //TODO this shouldn't know about the scratchpad
             $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
@@ -219,9 +225,11 @@ function prependCode(prepend, code) {
 var makeWorkerCode = function (code, options) {
     var delayTime = options.delay;
     var resumeFromDelayId = options.resumeFromDelayId ? options.resumeFromDelayId.toString() : "null";
+    var apiState = JSON.stringify(options.apiState || {});
 
-    code = prependCode(deval(function (delayMaker, delayTime, resumeFromDelayId) {
+    code = prependCode(deval(function (delayMaker, delayTime, resumeFromDelayId, apiState) {
         var loupe = {};
+        loupe.apiState = $apiState$;
 
         var _send = weevil.send;
         weevil.send = function (name) {
@@ -257,11 +265,16 @@ var makeWorkerCode = function (code, options) {
                 delay();
             });
 
+            if (loupe.apiState[timerId]) {
+                console.log('Overriding ' + args[1] + ' to ' + loupe.apiState[timerId].remainingTime);
+                args[1] = loupe.apiState[timerId].remainingTime;
+            }
+
             data.id = _setTimeout.apply(self, args);
             weevil.send('timeout:created', data);
         };
 
-    }, delayMaker.toString(), delayTime, resumeFromDelayId), code);
+    }, delayMaker.toString(), delayTime, resumeFromDelayId, apiState), code);
 
     code = $.prependWorkerCode(code);
     code = consolePlugin.prependWorkerCode(code);

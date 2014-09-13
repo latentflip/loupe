@@ -4,7 +4,9 @@ module.exports = React.createClass({
     render: function () {
         var animStyle = {
             animationDuration: this.props.timeout,
-            WebkitAnimationDuration: this.props.timeout
+            WebkitAnimationDuration: this.props.timeout,
+            animationPlayState: this.props.playState,
+            WebkitAnimationPlayState: this.props.playState
         };
 
         return (
