@@ -1192,18 +1192,24 @@ module.exports = AmpersandState.extend({
                 return this.instrumented.code;
             }
         },
-        workerCode: {
-            deps: ['runnableCode', 'delay'],
-            fn: function () {
-                return makeWorkerCode(this.runnableCode, this.delay);
-            }
-        },
+        //workerCode: {
+        //    deps: ['runnableCode', 'delay'],
+        //    fn: function () {
+        //        return makeWorkerCode(this.runnableCode, this.delay);
+        //    }
+        //},
         nodeSourceCode: {
             deps: ['instrumented'],
             fn: function () {
                 return this.instrumented.nodeSourceCode;
             }
         }
+    },
+
+    makeWorkerCode: function () {
+        return makeWorkerCode(this.runnableCode, {
+            delay: this.delay
+        });
     },
 
     decodeUriSource: function (encoded) {
@@ -1233,7 +1239,7 @@ module.exports = AmpersandState.extend({
 
             this.resetEverything();
 
-            this.worker = weevil(this.workerCode);
+            this.worker = weevil(this.makeWorkerCode());
 
             //TODO this shouldn't know about the scratchpad
             $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
@@ -1320,7 +1326,7 @@ function prependCode(prepend, code) {
     return prepend + ';\n' + code;
 }
 
-var makeWorkerCode = function (code, delayTime) {
+var makeWorkerCode = function (code, options) {
     code = prependCode(deval(function (delayMaker, delayTime) {
         var delayMaker = $delayMaker$;
 
@@ -1354,7 +1360,7 @@ var makeWorkerCode = function (code, delayTime) {
             weevil.send('timeout:created', data);
         };
 
-    }, delay.toString(), delayTime), code);
+    }, delay.toString(), options.delay), code);
 
     code = $.prependWorkerCode(code);
     code = consolePlugin.prependWorkerCode(code);
