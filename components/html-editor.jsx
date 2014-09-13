@@ -49,9 +49,9 @@ module.exports = React.createClass({
         var innerHTML = { __html: this.state.code.rawHtmlScratchpad };
 
         return (
-          <div className="flexChild">
+          <div className="flexChild columnParent">
             <div className='editor-switch'><button onClick={this.switchMode}>Edit</button></div>
-            <div className='html-scratchpad' dangerouslySetInnerHTML={innerHTML}></div>
+            <div className='html-scratchpad flexChild' dangerouslySetInnerHTML={innerHTML}></div>
           </div>
         );
     }

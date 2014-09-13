@@ -21,6 +21,7 @@ body {
 
 .flexContainer > * {
   height: 100%;
+  padding-top: 32px;
 }
 
 .rowParent, .columnParent{
@@ -122,6 +123,7 @@ body {
 .html-scratchpad {
   padding: 10px;
   background: #eee;
+  overflow: scroll;
 }
 
 .webapi {
@@ -248,6 +250,7 @@ body {
 .callback-queue {
   margin-bottom: 20px;
   margin-right: 20px;
+  overflow-y: scroll;
 }
 
 .callback {
@@ -418,10 +421,12 @@ body {
 }
 
 .tr-webapis-leave {
+  background: white;
   transition: background 0.01s linear;
 }
 
 .tr-webapis-leave.tr-webapis-leave-active {
+  background: white;
 }
 
 .tr-webapi-spawn {
@@ -491,4 +496,48 @@ body {
   top: 5px;
   right: 5px;
   z-index: 9999;
+}
+
+
+/************************/
+
+.top-nav {
+  background: #D80;
+  padding: 5px;
+  height: 32px;
+  position: absolute;
+  width: 100%;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+  color: #eee;
+}
+
+.top-nav .settings-button {
+  border: none;
+  background: none;
+  color: #eee;
+  font-size: 30px;
+  line-height: 30px;
+  margin: 0;
+  padding: 0;
+  margin-right: 10px;
+  margin-top: -7px;
+}
+
+.settingsColumn {
+  box-sizing: border-box;
+  flex: none;
+  width: 200px;
+  transition: width 0.15s linear; 
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+  background: #ddd;
+  color: #666;
+}
+
+.settingsColumn .setting {
+  margin: 20px;
+}
+
+.settingsColumn.hidden {
+  width: 0;
+  overflow: hidden;
 }

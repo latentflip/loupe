@@ -17,7 +17,10 @@ module.exports = AmpersandState.extend({
     props: {
         htmlScratchpad: ['array', true],
         codeLines: ['array', true],
-        worker: 'any'
+        worker: 'any',
+        delay: ['number', true, function () {
+            return parseInt(localStorage.loupeDelay, 10) || 750;
+        }]
     },
     derived: {
         rawHtmlScratchpad: {
@@ -69,9 +72,9 @@ module.exports = AmpersandState.extend({
             }
         },
         workerCode: {
-            deps: ['runnableCode'],
+            deps: ['runnableCode', 'delay'],
             fn: function () {
-                return makeWorkerCode(this.runnableCode);
+                return makeWorkerCode(this.runnableCode, this.delay);
             }
         },
         nodeSourceCode: {
@@ -196,11 +199,11 @@ function prependCode(prepend, code) {
     return prepend + ';\n' + code;
 }
 
-var makeWorkerCode = function (code) {
-    code = prependCode(deval(function (delayMaker) {
+var makeWorkerCode = function (code, delayTime) {
+    code = prependCode(deval(function (delayMaker, delayTime) {
         var delayMaker = $delayMaker$;
 
-        var delay = delayMaker(750);
+        var delay = delayMaker($delayTime$);
 
         //Override setTimeout
         var _setTimeout = self.setTimeout;
@@ -215,7 +218,6 @@ var makeWorkerCode = function (code) {
                 data.state = 'started';
                 data.started = +new Date();
                 data.error = (data.started - data.queued) - timeout;
-                delay();
                 weevil.send('timeout:started', data);
                 delay();
 
@@ -231,7 +233,7 @@ var makeWorkerCode = function (code) {
             weevil.send('timeout:created', data);
         };
 
-    }, delay.toString()), code);
+    }, delay.toString(), delayTime), code);
 
     code = $.prependWorkerCode(code);
     code = consolePlugin.prependWorkerCode(code);
