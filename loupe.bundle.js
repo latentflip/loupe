@@ -663,6 +663,15 @@ var call = function (name) {
 };
 
 var instruments = {
+    //Identifier: function (id, node) {
+    //    var name = node.source();
+    //    node.update("(console.log(" + name + "), " +name + ")");
+    //},
+    UpdateExpression: function (id, node) {
+        console.log('UPDATE', node);
+        var name = node.argument.name;
+        node.update("weevil.tap('scope:update', { name: " + name + ", value: " + node.source() + "})");
+    },
     ExpressionStatement: function (id, node, before, after) {
         node.update(node.source() + ';');
     },
@@ -1480,7 +1489,8 @@ module.exports = AmpersandState.extend({
                             }
                         }
                         self.currentExecution = delayId;
-                    });
+                    })
+                    .on('scope:update', console.log.bind(console, 'scope'));
 
         }.bind(this), 0);
     }
@@ -1557,6 +1567,11 @@ var makeWorkerCode = function (code, options) {
         weevil.send = function (name) {
             if (loupe.skipDelays && name !== 'delay') { return; }
             return _send.apply(this, arguments);
+        };
+
+        weevil.tap = function (name, options) {
+            weevil.send(name, options);
+            return options.value;
         };
 
         var delayMaker = $delayMaker$;

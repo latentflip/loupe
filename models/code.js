@@ -200,7 +200,8 @@ module.exports = AmpersandState.extend({
                             }
                         }
                         self.currentExecution = delayId;
-                    });
+                    })
+                    .on('scope:update', console.log.bind(console, 'scope'));
 
         }.bind(this), 0);
     }
@@ -277,6 +278,11 @@ var makeWorkerCode = function (code, options) {
         weevil.send = function (name) {
             if (loupe.skipDelays && name !== 'delay') { return; }
             return _send.apply(this, arguments);
+        };
+
+        weevil.tap = function (name, options) {
+            weevil.send(name, options);
+            return options.value;
         };
 
         var delayMaker = $delayMaker$;
