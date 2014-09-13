@@ -16,7 +16,6 @@ module.exports = React.createClass({
 
         this.listenTo(state.apis, 'callback:spawned', function (model) {
             this.refs[model.id].flash();
-            console.log(this.refs);
         }.bind(this));
     },
 

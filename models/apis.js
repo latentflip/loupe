@@ -84,6 +84,9 @@ var Query = AmpersandState.extend({
     pause: function () {
     },
     resume: function () {
+    },
+    getPausedState: function () {
+        return { };
     }
 });
 

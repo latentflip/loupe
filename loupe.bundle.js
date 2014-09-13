@@ -576,7 +576,6 @@ module.exports = React.createClass({displayName: 'exports',
 
         this.listenTo(state.apis, 'callback:spawned', function (model) {
             this.refs[model.id].flash();
-            console.log(this.refs);
         }.bind(this));
     },
 
@@ -627,6 +626,7 @@ module.exports = function (delay, fromId) {
         //var startedAt = new Date().getTime();
         while (countdown--) {
             weevil.send('delay', id + microId);
+            loupe.triggerDelay(id + microId);
 
             if (!fromId || (id + microId) > fromId) { 
                 loupe.skipDelays = false;
@@ -771,9 +771,20 @@ module.exports.prependWorkerCode = function(code) {
 module.exports.server = deval(function () {
     var $ = {
         _callbacks: {},
+        replayCallbacks: function (cbs) {
+            var self = this;
+
+            Object.keys(cbs).forEach(function (delayId) {
+                var args = cbs[delayId];
+                loupe.onDelay(delayId, function () {
+                    self._callbacks[args[0]](args[1]);
+                });
+            });
+        },
         register: function (emitter) {
             this.emitter = emitter;
             this.emitter.on('query:event', function (id, callbackId) {
+                console.log(['Running', id, callbackId].join('/'));
                 this._callbacks[id](callbackId);
             }.bind(this));
         },
@@ -801,11 +812,21 @@ module.exports.server = deval(function () {
         }
     };
     $.register(weevil);
+    $.replayCallbacks(loupe.appState.query);
 });
 
 module.exports.createClient = function (codeModel, emitter, document) {
     var listeners = [
     ];
+
+    var historyLog = {
+    };
+
+    window.historyLog = historyLog;
+
+    codeModel.on('ready-to-run', function () {
+        //historyLog = {};
+    });
 
     emitter.on('query:addEventListener', function (data) {
         var els;
@@ -826,12 +847,16 @@ module.exports.createClient = function (codeModel, emitter, document) {
 
         [].forEach.call(els, function (el) {
             var cb = function () {
+
                 var callbackId = data.id + ":" + Date.now();
                 codeModel.trigger('callback:spawn', {
                     id: callbackId,
                     apiId: data.id,
                     code: "[" + data.event + "] " + data.source
                 });
+
+                historyLog[codeModel.currentExecution] = [data.id, callbackId];
+
                 emitter.send('query:event', data.id, callbackId);
             };
 
@@ -847,6 +872,10 @@ module.exports.createClient = function (codeModel, emitter, document) {
         });
         listeners = [];
     });
+
+    return {
+        historyLog: historyLog
+    };
 };
 
 },{"deval":53}],18:[function(require,module,exports){
@@ -1173,6 +1202,9 @@ var Query = AmpersandState.extend({
     pause: function () {
     },
     resume: function () {
+    },
+    getPausedState: function () {
+        return { };
     }
 });
 
@@ -1348,11 +1380,11 @@ module.exports = AmpersandState.extend({
         this.on('change:delay', pauseAndResume);
     },
 
-    makeWorkerCode: function (fromId, apiState) {
+    makeWorkerCode: function (fromId, appState) {
         return makeWorkerCode(this.runnableCode, {
             delay: this.delay,
             resumeFromDelayId: fromId,
-            apiState: apiState
+            appState: appState
         });
     },
 
@@ -1384,14 +1416,20 @@ module.exports = AmpersandState.extend({
 
     resume: function () {
         this.trigger('resumed');
-        var webapiState = app.store.apis.getPausedState();
+        var appState = {
+            webapis: app.store.apis.getPausedState(),
+            query: this.queryClient.historyLog
+        };
 
         this.ignoreEvents = true;
-        this.run(this.pausedExecution, webapiState);
+        this.run(this.pausedExecution, appState);
     },
 
-    run: function (fromId, apiState) {
-        apiState = apiState || {};
+    run: function (fromId, appState) {
+        appState = appState || {
+            webapis: {},
+            query: {}
+        };
 
         setTimeout(function () {
             var self = this;
@@ -1401,10 +1439,10 @@ module.exports = AmpersandState.extend({
             }
 
             this.trigger('ready-to-run');
-            this.worker = weevil(this.makeWorkerCode(fromId, apiState));
+            this.worker = weevil(this.makeWorkerCode(fromId, appState));
 
             //TODO this shouldn't know about the scratchpad
-            $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
+            this.queryClient = $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
             consolePlugin.createClient(this, this.worker);
 
             this.worker
@@ -1431,6 +1469,7 @@ module.exports = AmpersandState.extend({
                         self.trigger('callback:completed', 'timer:' + timer.id);
                     })
                     .on('callback:shifted', function (callbackId) {
+                        console.log('----');
                         self.trigger('callback:shifted', callbackId);
                     })
                     .on('callback:completed', function (callbackId) {
@@ -1495,11 +1534,26 @@ function prependCode(prepend, code) {
 var makeWorkerCode = function (code, options) {
     var delayTime = options.delay;
     var resumeFromDelayId = options.resumeFromDelayId ? options.resumeFromDelayId.toString() : "null";
-    var apiState = JSON.stringify(options.apiState || {});
+    var appState = JSON.stringify(options.appState || {});
 
-    code = prependCode(deval(function (delayMaker, delayTime, resumeFromDelayId, apiState) {
+    code = $.prependWorkerCode(code);
+    code = consolePlugin.prependWorkerCode(code);
+    code = prependCode(deval(function (delayMaker, delayTime, resumeFromDelayId, appState) {
         var loupe = {};
-        loupe.apiState = $apiState$;
+        loupe.appState = $appState$;
+        loupe._onDelayCallbacks = {};
+        loupe.onDelay = function (id, cb) {
+            this._onDelayCallbacks[id] = this._onDelayCallbacks[id] || [];
+            this._onDelayCallbacks[id].push(cb);
+        };
+        loupe.triggerDelay = function (id) {
+            var cbs = this._onDelayCallbacks[id];
+            if (cbs) {
+                cbs.forEach(function (cb) {
+                    _setTimeout(cb, 0);
+                });
+            }
+        };
 
         var _send = weevil.send;
         weevil.send = function (name) {
@@ -1535,19 +1589,17 @@ var makeWorkerCode = function (code, options) {
                 delay();
             });
 
-            if (loupe.apiState[timerId]) {
-                console.log('Overriding ' + args[1] + ' to ' + loupe.apiState[timerId].remainingTime);
-                args[1] = loupe.apiState[timerId].remainingTime;
+            if (loupe.appState.webapis[timerId]) {
+                console.log('Overriding ' + args[1] + ' to ' + loupe.appState.webapis[timerId].remainingTime);
+                args[1] = loupe.appState.webapis[timerId].remainingTime;
             }
 
             data.id = _setTimeout.apply(self, args);
             weevil.send('timeout:created', data);
         };
 
-    }, delayMaker.toString(), delayTime, resumeFromDelayId, apiState), code);
+    }, delayMaker.toString(), delayTime, resumeFromDelayId, appState), code);
 
-    code = $.prependWorkerCode(code);
-    code = consolePlugin.prependWorkerCode(code);
     return code;
 };
 
