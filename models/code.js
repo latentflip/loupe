@@ -5,6 +5,7 @@ var wrapInsertionPoints = require('../lib/wrap-insertion-points');
 var weevil = require('weevil');
 var tag = require('../lib/tag');
 var delayMaker = require('../lib/delay');
+var debounce = require('lodash.debounce');
 
 var $ = require('../lib/plugins/query');
 var consolePlugin = require('../lib/plugins/console');
@@ -20,7 +21,8 @@ module.exports = AmpersandState.extend({
         worker: 'any',
         delay: ['number', true, function () {
             return parseInt(localStorage.loupeDelay, 10) || 750;
-        }]
+        }],
+        running: ['boolean', true, false]
     },
     derived: {
         rawHtmlScratchpad: {
@@ -79,6 +81,23 @@ module.exports = AmpersandState.extend({
         }
     },
 
+    initialize: function () {
+        this.on('ready-to-run', function () { this.running = true; });
+        this.on('resumed', function () { this.running = true; });
+        this.on('paused', function () { this.running = false; });
+        this.on('reset-everything', function () { this.running = false; });
+
+        var self = this;
+        var pauseAndResume = debounce(function () {
+            if (self.running) {
+                self.pause();
+                self.resume();
+            }
+        }, 100);
+
+        this.on('change:delay', pauseAndResume);
+    },
+
     makeWorkerCode: function (fromId, apiState) {
         return makeWorkerCode(this.runnableCode, {
             delay: this.delay,
@@ -103,6 +122,7 @@ module.exports = AmpersandState.extend({
 
     resetEverything: function () {
         this.trigger('reset-everything');
+        this.running = false;
         if (this.worker) { this.worker.kill(); }
     },
 
@@ -122,7 +142,6 @@ module.exports = AmpersandState.extend({
 
     run: function (fromId, apiState) {
         apiState = apiState || {};
-        this.trigger('ready-to-run');
 
         setTimeout(function () {
             var self = this;
@@ -131,6 +150,7 @@ module.exports = AmpersandState.extend({
                 this.resetEverything();
             }
 
+            this.trigger('ready-to-run');
             this.worker = weevil(this.makeWorkerCode(fromId, apiState));
 
             //TODO this shouldn't know about the scratchpad
