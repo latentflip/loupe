@@ -161,7 +161,7 @@ module.exports = React.createClass({displayName: 'exports',
         var calls = [];
 
         this.state.stack.each(function (call) {
-            calls.unshift(CallStackItem({key: call._id, isCallback: call.isCallback}, call.code));
+            calls.unshift(CallStackItem({key: call._key, isCallback: call.isCallback}, call.code));
         });
 
         return (
@@ -1168,7 +1168,11 @@ var AmpersandCollection = require('ampersand-collection');
 var StackFrame = AmpersandState.extend({
     props: {
         _id: 'any',
+        _key: 'string',
         code: 'string'
+    },
+    initialize: function () {
+        this._key = this._key || Date.now().toString();
     }
 });
 
