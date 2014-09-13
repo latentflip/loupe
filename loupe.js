@@ -5,8 +5,7 @@ var AmpersandCollection = require('ampersand-collection');
 var AmpersandState = require('ampersand-state');
 var deval = require('deval');
 
-var CallStack = AmpersandCollection.extend({
-});
+var CallStack = require('./models/callstack');
 
 var Code = require('./models/code');
 var Apis = require('./models/apis');
@@ -39,13 +38,15 @@ app.store.code.on('change:encodedSource', function () {
 
 app.store.code.on('node:will-run', function (id, source, invocation) {
     app.store.callstack.add({
-        id: id + ':' + invocation,
+        _id: id,
         code: source
     });
 });
 
 app.store.code.on('node:did-run', function (id, invocation) {
-    app.store.callstack.remove(id + ':' + invocation);
+    app.store.callstack.pop();
+    //app.store.callstack.remove(app.store.callstack.at(app.store.call
+    //app.store.callstack.remove(id + ':' + invocation);
 });
 
 app.store.code.on('webapi:started', function (data) {

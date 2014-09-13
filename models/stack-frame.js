@@ -3,7 +3,7 @@ var AndModel = require('ampersand-model');
 module.exports = AndModel.extend({
     type: 'stack-frame',
     props: {
-        id: 'string',
+        _id: 'string',
         nodeId: 'number',
         source: 'string',
         expressionType: 'string',

@@ -4,7 +4,7 @@ var deval = require('deval');
 var wrapInsertionPoints = require('../lib/wrap-insertion-points');
 var weevil = require('weevil');
 var tag = require('../lib/tag');
-var delay = require('../lib/delay');
+var delayMaker = require('../lib/delay');
 
 var $ = require('../lib/plugins/query');
 var consolePlugin = require('../lib/plugins/console');
@@ -106,13 +106,12 @@ module.exports = AmpersandState.extend({
     },
 
     pause: function () {
-        console.log('Paused at', this.currentExecution);
         this.pausedExecution = this.currentExecution;
         this.worker.kill();
     },
 
     resume: function () {
-        console.log('Resuming from', this.pausedExecution);
+        this.ignoreEvents = true;
         this.run(this.pausedExecution);
     },
 
@@ -132,21 +131,16 @@ module.exports = AmpersandState.extend({
             $.createClient(this, this.worker, document.querySelector('.html-scratchpad'));
             consolePlugin.createClient(this, this.worker);
 
-            var invocations = {};
             this.worker
                     .on('node:before', function (node) {
-                        invocations[node.id] = invocations[node.id] || 0;
-                        invocations[node.id]++;
-
-                        self.trigger('node:will-run', node.id, self.nodeSourceCode[node.id], invocations[node.id]);
+                        self.trigger('node:will-run', node.id, self.nodeSourceCode[node.id]);
                         //$('#node-' + node.id).addClass('running');
                     })
                     .on('node:after', function (node) {
-                        self.trigger('node:did-run', node.id, invocations[node.id]);
+                        self.trigger('node:did-run', node.id);
                         //$('#node-' + node.id).removeClass('running');
                     })
                     .on('timeout:created', function (timer) {
-
                         self.trigger('webapi:started', {
                             id: 'timer:' + timer.id,
                             type: 'timeout',
@@ -167,6 +161,11 @@ module.exports = AmpersandState.extend({
                         self.trigger('callback:completed', callbackId);
                     })
                     .on('delay', function (delayId) {
+                        if (self.pausedExecution) {
+                            if (delayId >= self.pausedExecution) {
+                                self.ignoreEvents = false;
+                            }
+                        }
                         self.currentExecution = delayId;
                     });
 
@@ -217,13 +216,22 @@ function prependCode(prepend, code) {
     return prepend + ';\n' + code;
 }
 
-var makeWorkerCode = function (code, fromId) {
-    code = prependCode(deval(function (delayMaker, delayTime, fromId) {
+var makeWorkerCode = function (code, options) {
+    var delayTime = options.delay;
+    var resumeFromDelayId = options.resumeFromDelayId ? options.resumeFromDelayId.toString() : "null";
+
+    code = prependCode(deval(function (delayMaker, delayTime, resumeFromDelayId) {
         var loupe = {};
+
+        var _send = weevil.send;
+        weevil.send = function (name) {
+            if (loupe.skipDelays && name !== 'delay') { return; }
+            return _send.apply(this, arguments);
+        };
 
         var delayMaker = $delayMaker$;
 
-        var delay = delayMaker($delayTime$, $fromId$);
+        var delay = delayMaker($delayTime$, $resumeFromDelayId$);
 
         //Override setTimeout
         var _setTimeout = self.setTimeout;
@@ -253,7 +261,7 @@ var makeWorkerCode = function (code, fromId) {
             weevil.send('timeout:created', data);
         };
 
-    }, delay.toString(), options.delay, fromId ? fromId.toString() : "null"), code);
+    }, delayMaker.toString(), delayTime, resumeFromDelayId), code);
 
     code = $.prependWorkerCode(code);
     code = consolePlugin.prependWorkerCode(code);
