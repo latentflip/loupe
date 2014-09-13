@@ -663,12 +663,9 @@ var call = function (name) {
 };
 
 var instruments = {
-    //ExpressionStatement: function (id, node, before, after) {
-    //    var newString = '(' + before(id, node) + ");" + node.source() + ";(" + after(id, node) + ');';
-    //    console.log('EE', newString);
-    //    node.update(newString);
-
-    //},
+    ExpressionStatement: function (id, node, before, after) {
+        node.update(node.source() + ';');
+    },
     CallExpression: function (id, node, before, after) {
         var source = node.source();
 
@@ -694,6 +691,7 @@ var instruments = {
 };
 
 var isInstrumentable = function (node) {
+    console.log(node.type, node.source());
     return !!instruments[node.type];
 };
 
