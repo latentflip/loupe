@@ -26,7 +26,7 @@ module.exports = React.createClass({
             <div className='flexContainer'>
               <nav className="top-nav">
                 <button className='settings-button' onClick={this.toggleSettings}>⚒</button>
-                loupe
+                <h1>loupe</h1>
               </nav>
               <div className="flexChild rowParent">
                 <SettingsPanel open={this.state.settingsOpen}/>

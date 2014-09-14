@@ -194,10 +194,10 @@ body {
 .stopwatch-wrapper:before {
   position: absolute;
   content: "";
-  width: 39%;
-  height: 16%;
-  top: 29%;
-  left: 20.5%;
+  width: 50%;
+  height: 28%;
+  top: 35%;
+  left: 25.5%;
   border-left: 7px white solid;
   border-bottom: 7px white solid;
   transform: rotate(-45deg);
@@ -405,6 +405,10 @@ body {
 .code-node {
 }
 
+.code-node:empty {
+  display: none;
+}
+
 .code-node.running {
   background: rgba(236, 117, 74, 0.25);
 } 
@@ -509,6 +513,15 @@ body {
   width: 100%;
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
   color: #eee;
+  padding-left: 10px;
+}
+
+.top-nav h1 {
+  font-size: 20px;
+  font-family: Din Alternate, Helvetica Neue, Helvetica, Arial, sans-serif;
+  display: inline;
+  position: relative;
+  top: -2px;
 }
 
 .top-nav .settings-button {

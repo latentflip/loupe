@@ -73,7 +73,7 @@ module.exports = React.createClass({displayName: 'exports',
             React.DOM.div({className: "flexContainer"}, 
               React.DOM.nav({className: "top-nav"}, 
                 React.DOM.button({className: "settings-button", onClick: this.toggleSettings}, "⚒"), 
-                "loupe"
+                React.DOM.h1(null, "loupe")
               ), 
               React.DOM.div({className: "flexChild rowParent"}, 
                 SettingsPanel({open: this.state.settingsOpen}), 
@@ -1517,6 +1517,8 @@ var instrumentAndWrapHTML = function (code) {
             nodeSourceCode[id] = code;
         }
     });
+
+    html = html.replace(/;\n/g, ';');
 
     return {
         code: instrumented.code,

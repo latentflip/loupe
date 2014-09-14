@@ -238,6 +238,8 @@ var instrumentAndWrapHTML = function (code) {
         }
     });
 
+    html = html.replace(/;\n/g, ';');
+
     return {
         code: instrumented.code,
         html: html,
