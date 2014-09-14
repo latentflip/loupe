@@ -298,6 +298,7 @@ var makeWorkerCode = function (code, options) {
                 data.state = 'started';
                 data.started = +new Date();
                 data.error = (data.started - data.queued) - timeout;
+                delay();
                 weevil.send('timeout:started', data);
                 delay();
 
