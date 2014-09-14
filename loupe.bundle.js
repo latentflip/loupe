@@ -505,6 +505,14 @@ module.exports = React.createClass({displayName: 'exports',
             el.classList.add('tr-webapi-spawn-active');
         }, 16.6);
 
+        var fallbackTimeout = setTimeout(function () {
+            try {
+                onTransitionOutEnd();
+                onTransitionInEnd();
+            } catch (e) {
+            }
+        }, 1000);
+
         var onTransitionOutEnd = function () {
             el.classList.remove('tr-webapi-spawn');
             el.removeEventListener('transitionend', onTransitionOutEnd, false);
@@ -691,7 +699,6 @@ var instruments = {
 };
 
 var isInstrumentable = function (node) {
-    console.log(node.type, node.source());
     return !!instruments[node.type];
 };
 
@@ -782,7 +789,6 @@ module.exports.server = deval(function () {
         register: function (emitter) {
             this.emitter = emitter;
             this.emitter.on('query:event', function (id, callbackId) {
-                console.log(['Running', id, callbackId].join('/'));
                 this._callbacks[id](callbackId);
             }.bind(this));
         },
@@ -1467,7 +1473,6 @@ module.exports = AmpersandState.extend({
                         self.trigger('callback:completed', 'timer:' + timer.id);
                     })
                     .on('callback:shifted', function (callbackId) {
-                        console.log('----');
                         self.trigger('callback:shifted', callbackId);
                     })
                     .on('callback:completed', function (callbackId) {

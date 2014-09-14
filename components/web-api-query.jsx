@@ -8,6 +8,14 @@ module.exports = React.createClass({
             el.classList.add('tr-webapi-spawn-active');
         }, 16.6);
 
+        var fallbackTimeout = setTimeout(function () {
+            try {
+                onTransitionOutEnd();
+                onTransitionInEnd();
+            } catch (e) {
+            }
+        }, 1000);
+
         var onTransitionOutEnd = function () {
             el.classList.remove('tr-webapi-spawn');
             el.removeEventListener('transitionend', onTransitionOutEnd, false);

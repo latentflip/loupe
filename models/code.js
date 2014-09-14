@@ -187,7 +187,6 @@ module.exports = AmpersandState.extend({
                         self.trigger('callback:completed', 'timer:' + timer.id);
                     })
                     .on('callback:shifted', function (callbackId) {
-                        console.log('----');
                         self.trigger('callback:shifted', callbackId);
                     })
                     .on('callback:completed', function (callbackId) {
