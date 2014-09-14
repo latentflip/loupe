@@ -20,6 +20,10 @@ module.exports = React.createClass({
         this.state.code.delay = parseInt(this.refs.delay.getDOMNode().value);
     },
 
+    changeRenders: function () {
+        app.store.code.simulateRenders = this.refs.renders.getDOMNode().checked;
+    },
+
     render: function () {
         var classes = "flexChild columnParent settingsColumn";
         if (!this.props.open) { classes += " hidden"; }
@@ -30,6 +34,10 @@ module.exports = React.createClass({
               <label>
                 Delay: {this.state.code.delay}ms
                 <input type="range" ref="delay" onChange={this.changeDelay} min="0" max="2000" initialValue={this.state.code.delay}/>
+              </label>
+              <label>
+                Simulate Renders:
+                <input type="checkbox" ref="renders" onChange={this.changeRenders} />
               </label>
             </div>
           </div>

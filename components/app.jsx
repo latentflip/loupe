@@ -6,15 +6,29 @@ var EventLoopSpinner = require('./event-loop-spinner.jsx');
 var WebApis = require('./web-apis.jsx');
 var Editor = require('./editor.jsx');
 var CallbackQueue = require('./callback-queue.jsx');
+var RenderQueue = require('./render-queue.jsx');
 var HTMLEditor = require('./html-editor.jsx');
 var SettingsPanel = require('./settings-panel.jsx');
+var EventMixin = require('react-backbone-events-mixin');
 
 module.exports = React.createClass({
+    mixins: [EventMixin],
+
     getInitialState: function () {
+        var showRenderQueue = window.location.search.match(/show-renders/);
+
         return {
-            settingsOpen: false
+            settingsOpen: false,
+            code: app.store.code
         };
     },
+
+    registerListeners: function (props, state) {
+        this.listenTo(state.code, 'change:simulateRenders', function () {
+            this.forceUpdate();
+        }.bind(this));
+    },
+
     toggleSettings: function () {
         this.setState({
             settingsOpen: !this.state.settingsOpen
@@ -56,6 +70,7 @@ module.exports = React.createClass({
                   </div>
 
                   <div className="flexChild callbackRow columnParent">
+                    { this.state.code.simulateRenders ? <RenderQueue /> : null }
                     <CallbackQueue />
                   </div>
                 </div>

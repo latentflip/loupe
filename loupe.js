@@ -10,7 +10,7 @@ var CallStack = require('./models/callstack');
 var Code = require('./models/code');
 var Apis = require('./models/apis');
 var CallbackQueue = require('./models/callback-queue');
-
+var RenderQueue = require('./models/render-queue');
 
 var Router = require('./router');
 
@@ -22,7 +22,8 @@ window.app.store = {
     callstack: new CallStack(),
     code: new Code(),
     apis: new Apis(),
-    queue: new CallbackQueue()
+    queue: new CallbackQueue(),
+    renderQueue: new RenderQueue()
 };
 
 app.store.code.on('change:codeLines', function () {
@@ -86,6 +87,7 @@ app.store.apis.on('callback:spawn', function (data) {
 });
 
 app.store.code.on('reset-everything', function () {
+    app.store.renderQueue.reset();
     app.store.queue.reset();
     app.store.callstack.reset();
     app.store.apis.reset();
@@ -97,6 +99,18 @@ app.store.code.on('paused', function () {
 
 app.store.code.on('resumed', function () {
     app.store.apis.resume();
+});
+
+app.store.callstack.on('all', function () {
+    if (app.store.callstack.length === 0) {
+        app.store.renderQueue.shift();
+    }
+});
+
+app.store.renderQueue.on('add', function () {
+    if (app.store.callstack.length === 0) {
+        app.store.renderQueue.shift();
+    }
 });
 
 //app.store.apis.add([

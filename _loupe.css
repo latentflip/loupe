@@ -253,6 +253,9 @@ body {
   margin-right: 20px;
   overflow-y: scroll;
 }
+.callback-queue.render-queue {
+  margin-bottom: 5px;
+}
 
 .callback {
   font-family: monospace;
@@ -313,6 +316,10 @@ body {
 
 .callback-queue:before {
   content: "Callback Queue";
+}
+
+.callback-queue.render-queue:before {
+  content: "Render Queue";
 }
 
 .stack {
@@ -503,7 +510,42 @@ body {
   z-index: 9999;
 }
 
+.render-queue .callback-queued {
+  background: white;
+}
 
+.render-queue .callback-delayed {
+  background: rgba(255,0,0,0.5);
+  transition: background 0.2s linear;
+}
+
+.render-queue .callback-rendered {
+  background: rgba(0,255,0,0.5);
+  transition: background 0.4s linear;
+}
+
+
+/*
+.tr-render-queue-enter {
+  background: white;
+  transition: background 0.5s linear;
+}
+
+.tr-render-queue-enter.tr-render-queue-enter-active {
+  background: red;
+}
+
+.tr-render-queue-leave {
+  background: green;
+  opacity: 1;
+  transition: all 0.2s linear;
+}
+
+.tr-render-queue-leave.tr-render-queue-leave-active {
+  background: white;
+  opacity: 0.01;
+  transition: all 0.2s linear;
+}*/
 /************************/
 
 .top-nav {

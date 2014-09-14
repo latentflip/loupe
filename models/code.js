@@ -22,7 +22,8 @@ module.exports = AmpersandState.extend({
         delay: ['number', true, function () {
             return parseInt(localStorage.loupeDelay, 10) || 750;
         }],
-        running: ['boolean', true, false]
+        running: ['boolean', true, false],
+        simulateRenders: ['boolean', true, false]
     },
     derived: {
         rawHtmlScratchpad: {
