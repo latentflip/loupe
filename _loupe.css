@@ -124,6 +124,7 @@ body {
   padding: 10px;
   background: #eee;
   overflow: scroll;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
 .webapi {
