@@ -8,10 +8,15 @@
  }*/
 html, body, .flexContainer {
   min-height: 100vh;
+  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 body {
   padding: 0;
   margin: 0;
+}
+h1,h2,h3,h4 {
+  font-family: Din Alternate, Helvetica Neue, Helvetica, Arial, sans-serif;
+color: #666;
 }
 
 .flexContainer {
@@ -68,7 +73,10 @@ body {
 }
 
 .editorBox, .stackRow {
-  flex: 3;
+  -webkit-box-flex: 3;
+  -webkit-flex: 3;
+      -ms-flex: 3;
+          flex: 3;
   position: relative;
 }
 
@@ -77,7 +85,10 @@ body {
 }
 
 .codeColumn {
-  flex: 0.5;
+  -webkit-box-flex: 0.5;
+  -webkit-flex: 0.5;
+      -ms-flex: 0.5;
+          flex: 0.5;
   margin-right: 20px;
   border-right: 2px #ddd solid;
 }
@@ -113,7 +124,10 @@ body {
 }
 
 .ace-editor-wrapper {
-  flex: 1;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
 }
 
 .ace_editor {
@@ -155,9 +169,20 @@ body {
 }
 
 
+@-webkit-keyframes rota {
+  0%   { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+}
+
+
 @keyframes rota {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0%   { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+}
+
+@-webkit-keyframes fill {
+  0%        { opacity: 0; }
+  50%, 100% { opacity: 1; }
 }
 
 @keyframes fill {
@@ -165,15 +190,32 @@ body {
   50%, 100% { opacity: 1; }
 }
 
+@-webkit-keyframes mask {
+  0%        { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
 @keyframes mask {
   0%        { opacity: 1; }
   50%, 100% { opacity: 0; }
+}
+
+@-webkit-keyframes check {
+  0%        { opacity: 0; }
+  98%       { opacity: 0; }
+  100%      { opacity: 1; }
 }
 
 @keyframes check {
   0%        { opacity: 0; }
   98%       { opacity: 0; }
   100%      { opacity: 1; }
+}
+
+@-webkit-keyframes background {
+  0% { background: rgba(148,255,148,0); }
+  95% { background: rgba(148,255,148,0); }
+  100% { background: rgba(148,255,148,1); }
 }
 
 @keyframes background {
@@ -188,7 +230,8 @@ body {
   position: relative;
   background: rgba(148,255,148,1);
   border-radius: 250px;
-  animation: background 10s linear;
+  -webkit-animation: background 10s linear;
+          animation: background 10s linear;
   overflow: hidden;
 }
 
@@ -201,7 +244,9 @@ body {
   left: 25.5%;
   border-left: 7px white solid;
   border-bottom: 7px white solid;
-  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+      -ms-transform: rotate(-45deg);
+          transform: rotate(-45deg);
   z-index: 500;
 }
 
@@ -218,8 +263,11 @@ body {
   border-bottom-right-radius: 0;
   z-index: 200;
   border-right: none;
-  animation: rota 10s linear;
-  transform-origin: 100% 50%;
+  -webkit-animation: rota 10s linear;
+          animation: rota 10s linear;
+  -webkit-transform-origin: 100% 50%;
+      -ms-transform-origin: 100% 50%;
+          transform-origin: 100% 50%;
 }
 
 .stopwatch-filler {
@@ -227,7 +275,8 @@ body {
   border-bottom-left-radius: 0;
   z-index: 100;
   border-left: none;
-  animation: fill 10s steps(1, end);
+  -webkit-animation: fill 10s steps(1, end);
+          animation: fill 10s steps(1, end);
   left: 50%;
   opacity: 1;
 }
@@ -239,12 +288,14 @@ body {
   z-index: 300;
   opacity: 0;
   background: white;
-  animation: mask 10s steps(1, end);
+  -webkit-animation: mask 10s steps(1, end);
+          animation: mask 10s steps(1, end);
   border-radius: 250px 0 0 250px;
 }
 
 .stopwatch-spinner, .stopwatch-filler, .stopwatch-mask, .stopwatch-wrapper {
-  animation-duration: 3s;
+  -webkit-animation-duration: 3s;
+          animation-duration: 3s;
 }
 
 
@@ -350,13 +401,18 @@ body {
   width: 76px;
   position: relative;
   padding: 9px;
-  transform: rotate(0deg);
+  -webkit-transform: rotate(0deg);
+      -ms-transform: rotate(0deg);
+          transform: rotate(0deg);
   margin-left: 82px;
 }
 
 .spinner-wrapper-transition {
-  transform: rotate(180deg);
-  transition: transform 0.5s linear;
+  -webkit-transform: rotate(180deg);
+      -ms-transform: rotate(180deg);
+          transform: rotate(180deg);
+  -webkit-transition: -webkit-transform 0.5s linear;
+          transition: transform 0.5s linear;
 }
 
 .spinner-circle {
@@ -425,7 +481,8 @@ body {
 /*********************************/
 .tr-webapis-enter {
   background: rgb(255,255,194);
-  transition: background 0.2s linear;
+  -webkit-transition: background 0.2s linear;
+          transition: background 0.2s linear;
 }
 
 .tr-webapis-enter.tr-webapis-enter-active {
@@ -434,7 +491,8 @@ body {
 
 .tr-webapis-leave {
   background: white;
-  transition: background 0.01s linear;
+  -webkit-transition: background 0.01s linear;
+          transition: background 0.01s linear;
 }
 
 .tr-webapis-leave.tr-webapis-leave-active {
@@ -443,7 +501,8 @@ body {
 
 .tr-webapi-spawn {
   background: white;
-  transition: background 0.1s linear;
+  -webkit-transition: background 0.1s linear;
+          transition: background 0.1s linear;
 }
 
 .tr-webapi-spawn.tr-webapi-spawn-active {
@@ -453,7 +512,8 @@ body {
 /*********************************/
 .tr-queue-enter {
   background: rgb(255,255,194);
-  transition: background 0.2s linear;
+  -webkit-transition: background 0.2s linear;
+          transition: background 0.2s linear;
 }
 
 .tr-queue-enter.tr-queue-enter-active {
@@ -461,42 +521,57 @@ body {
 }
 
 .tr-queue-leave {
-  transform: translate(0, 0);
+  -webkit-transform: translate(0, 0);
+      -ms-transform: translate(0, 0);
+          transform: translate(0, 0);
   opacity: 1;
-  transition: all 0.25s linear;
+  -webkit-transition: all 0.25s linear;
+          transition: all 0.25s linear;
 }
 
 .tr-queue-leave.tr-queue-leave-active {
-  transform: translate(0, -100px);
+  -webkit-transform: translate(0, -100px);
+      -ms-transform: translate(0, -100px);
+          transform: translate(0, -100px);
   opacity: 0.01;
 }
 
 
 /*********************************/
 .tr-stack-enter {
-  transform: translate(0, 0);
+  -webkit-transform: translate(0, 0);
+      -ms-transform: translate(0, 0);
+          transform: translate(0, 0);
   opacity: 0.01;
-  transition: all 0.1s linear;
+  -webkit-transition: all 0.1s linear;
+          transition: all 0.1s linear;
 }
 
 .tr-stack-enter.stack-item-callback {
-  transform: translate(0, 100px);
-  transition: all 0.25s linear;
+  -webkit-transform: translate(0, 100px);
+      -ms-transform: translate(0, 100px);
+          transform: translate(0, 100px);
+  -webkit-transition: all 0.25s linear;
+          transition: all 0.25s linear;
 }
 
 .tr-stack-enter.tr-stack-enter-active {
-  transform: translate(0, 0);
+  -webkit-transform: translate(0, 0);
+      -ms-transform: translate(0, 0);
+          transform: translate(0, 0);
   opacity: 1;
 }
 
 .tr-stack-leave {
   opacity: 1;
-  transition: all 0.1s linear;
+  -webkit-transition: all 0.1s linear;
+          transition: all 0.1s linear;
 }
 
 .tr-stack-leave.tr-stack-leave-active {
   opacity: 0.01;
-  transition: all 0.1s linear;
+  -webkit-transition: all 0.1s linear;
+          transition: all 0.1s linear;
 }
 
 .htmlEditorBox {
@@ -516,12 +591,14 @@ body {
 
 .render-queue .callback-delayed {
   background: rgba(255,0,0,0.5);
-  transition: background 0.2s linear;
+  -webkit-transition: background 0.2s linear;
+          transition: background 0.2s linear;
 }
 
 .render-queue .callback-rendered {
   background: rgba(0,255,0,0.5);
-  transition: background 0.4s linear;
+  -webkit-transition: background 0.4s linear;
+          transition: background 0.4s linear;
 }
 
 
@@ -554,17 +631,16 @@ body {
   height: 32px;
   position: absolute;
   width: 100%;
-  font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
   color: #eee;
   padding-left: 10px;
 }
 
 .top-nav h1 {
   font-size: 20px;
-  font-family: Din Alternate, Helvetica Neue, Helvetica, Arial, sans-serif;
   display: inline;
   position: relative;
   top: -2px;
+  color: #eee;
 }
 
 .top-nav .settings-button {
@@ -581,9 +657,13 @@ body {
 
 .settingsColumn {
   box-sizing: border-box;
-  flex: none;
+  -webkit-box-flex: 0;
+  -webkit-flex: none;
+      -ms-flex: none;
+          flex: none;
   width: 200px;
-  transition: width 0.15s linear; 
+  -webkit-transition: width 0.15s linear;
+          transition: width 0.15s linear; 
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
   background: #ddd;
   color: #666;
@@ -596,4 +676,64 @@ body {
 .settingsColumn.hidden {
   width: 0;
   overflow: hidden;
+}
+
+.ReactModal__Overlay {
+    z-index: 20000;
+    background: rgba(0,0,0,0.4);
+}
+
+.ReactModal__Content {
+    left: 20%;
+    right: 20%;
+    border: none;
+    font-size: 14px;
+}
+
+.ReactModal__Content * {
+    color: #888;
+}
+
+.ReactModal__Content h1 {
+    margin-top: 0;
+}
+
+.ReactModal__Content h1 + h2 {
+    margin-top: 20px;
+}
+
+.ReactModal__Content h2 {
+    margin-top: 40px;
+    margin-bottom: 10px;
+}
+
+.ReactModal__Content a {
+    color: #DF8900;
+}
+
+.ReactModal__Content li {
+    margin-bottom: 5px;
+}
+
+.ReactModal__Content iframe {
+    margin: 40px auto;
+    max-width: 100%;
+    display: block;
+    border: none;
+}
+
+
+
+.modal-button {
+    float: right;
+}
+
+.modal-button:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+p.info {
+    text-align: center;
+    margin-top: 40px;
 }

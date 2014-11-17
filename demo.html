@@ -1,0 +1,13 @@
+<body>
+  <script>
+    function a() { b(); }
+    function b() { c(); }
+    function c() { d(); }
+    function d() { console.log('hi'); }
+    document.body.addEventListener('click', function () {
+      setTimeout(function () {
+        a();
+      }, 1000);
+    });
+  </script>
+</body>
