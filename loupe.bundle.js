@@ -138,16 +138,19 @@ module.exports = React.createClass({displayName: 'exports',
             Modal({
                 isOpen: this.state.modalOpen, 
                 onRequestClose: this.closeModal}, 
+
+                React.DOM.a({className: "modalClose", onClick: this.closeModal}, "close"), 
+
                 React.DOM.h1(null, "Loupe"), 
                 React.DOM.h2(null, "Intro"), 
-                React.DOM.p(null, "Loupe is a little visualisation to help you understand how JavaScript's call stack/event loop/callback queue interact with each other"), 
-                React.DOM.p(null, "The best thing to do to understand how this works is watch this video:"), 
+                React.DOM.p(null, "Loupe is a little visualisation to help you understand how JavaScript's call stack/event loop/callback queue interact with each other."), 
+                React.DOM.p(null, "The best thing to do to understand how this works is watch this video, then when you are ready, ", React.DOM.a({onClick: this.closeModal}, "go play!")), 
                 React.DOM.iframe({width: "444", height: "250", src: "//www.youtube.com/embed/8aGhZQkoFbQ", frameBorder: "0", allowFullScreen: true}), 
                 React.DOM.h2(null, "Instructions"), 
                 React.DOM.ul(null, 
                     React.DOM.li(null, "Write some code in the text editor on the left."), 
-                    React.DOM.li(null, "Hit the save-and-run button and watch it run"), 
-                    React.DOM.li(null, "You can create html elements in the gray box at the bottom left by hitting the edit button"), 
+                    React.DOM.li(null, "Hit the save-and-run button and watch it run."), 
+                    React.DOM.li(null, "You can create html elements in the gray box at the bottom left by hitting the edit button."), 
                     React.DOM.li(null, "Listen for DOM events on them with ", React.DOM.pre(null, "$.on(\"button\", \"click\", function () ", '{', " console.log(\"hello\") ", '}')), 
                     React.DOM.li(null, "Hit the tool icon at the top left to open a menu with extra settings."), 
                     React.DOM.li(null, "Need more help? Ping ", React.DOM.a({href: "http://twitter.com/philip_roberts"}, "@philip_roberts"), " on twitter.")
@@ -165,7 +168,9 @@ module.exports = React.createClass({displayName: 'exports',
                     React.DOM.li(null, "It also has some extra magic to make dom events, and timers work properly.")
                 ), 
 
-                React.DOM.p({class: "info"}, React.DOM.em(null, "Built by ", React.DOM.a({href: "http://github.com/latentflip"}, "Philip Roberts"), " from ", React.DOM.a({href: "http://andyet.com"}, "&yet"), ". Code is on ", React.DOM.a({href: "https://github.com/latentflip/loupe"}, "github")), ".")
+                React.DOM.p({className: "info"}, React.DOM.em(null, "Built by ", React.DOM.a({href: "http://github.com/latentflip"}, "Philip Roberts"), " from ", React.DOM.a({href: "http://andyet.com"}, "&yet"), ". Code is on ", React.DOM.a({href: "https://github.com/latentflip/loupe"}, "github")), "."), 
+
+                React.DOM.p({className: "info"}, "Got it? ", React.DOM.a({onClick: this.closeModal}, "Close this dialog"))
             )
           )
         )

@@ -661,3 +661,12 @@ p.info {
     text-align: center;
     margin-top: 40px;
 }
+
+a.modalClose {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+a:hover {
+    cursor: pointer;
+}
