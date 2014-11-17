@@ -108,12 +108,12 @@ module.exports = React.createClass({
 
                 <h2>How does this work?</h2>
                 <ul>
-                    <li>Loupe runs entirely in your browser!</li>
+                    <li>Loupe runs entirely in your browser.</li>
                     <li>It takes your code.</li>
                     <li>Runs it through esprima, a JS parser.</li>
                     <li>Instruments it a bunch so that loupe knows where function calls, timeouts, dom events, etc happen.</li>
                     <li>Adds a whole bunch of while loops everywhere to slow down the code as it runs.</li>
-                    <li>This modified code is then turned back into JavaScript and sent to a webworker (in your browser) which runs it.
+                    <li>This modified code is then turned back into JavaScript and sent to a webworker (in your browser) which runs it.</li>
                     <li>As it runs, the instrumentation sends messages to the visualisation about what is going on so it can animate things at the right time.</li>
                     <li>It also has some extra magic to make dom events, and timers work properly.</li>
                 </ul>
