@@ -26,57 +26,39 @@ color: #666;
 
 .flexContainer > * {
   height: 100%;
-  padding-top: 32px;
+  padding-top: 40px;
 }
 
 .rowParent, .columnParent{
-  display: -webkit-box;
   display: -ms-flexbox;
-  display: -webkit-flex;
   display: flex;
-  -webkit-box-direction: normal;
-  -webkit-box-orient: horizontal;
-  -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-flex-wrap: nowrap;
   -ms-flex-wrap: nowrap;
   flex-wrap: nowrap;
-  -webkit-box-pack: start;
-  -webkit-justify-content: flex-start;
   -ms-flex-pack: start;
   justify-content: flex-start;
-  -webkit-align-content: stretch;
   -ms-flex-line-pack: stretch;
   align-content: stretch;
-  -webkit-box-align: stretch;
-  -webkit-align-items: stretch;
   -ms-flex-align: stretch;
   align-items: stretch;
 }
 
 .columnParent{
-  -webkit-box-orient: vertical;
-  -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
 }
 
 .flexChild{
-  -webkit-box-flex: 1;
-  -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
-  -webkit-align-self: auto;
   -ms-flex-item-align: auto;
   align-self: auto;
 }
 
 .editorBox, .stackRow {
-  -webkit-box-flex: 3;
-  -webkit-flex: 3;
-      -ms-flex: 3;
-          flex: 3;
+  -ms-flex: 3;
+      flex: 3;
   position: relative;
 }
 
@@ -85,10 +67,8 @@ color: #666;
 }
 
 .codeColumn {
-  -webkit-box-flex: 0.5;
-  -webkit-flex: 0.5;
-      -ms-flex: 0.5;
-          flex: 0.5;
+  -ms-flex: 0.5;
+      flex: 0.5;
   margin-right: 20px;
   border-right: 2px #ddd solid;
 }
@@ -107,6 +87,7 @@ color: #666;
   font-size: 12px;
   overflow-y: hidden;
   position: relative;
+  margin-top: 30px;
 }
 
 .editor:before {
@@ -124,10 +105,9 @@ color: #666;
 }
 
 .ace-editor-wrapper {
-  -webkit-box-flex: 1;
-  -webkit-flex: 1;
-      -ms-flex: 1;
-          flex: 1;
+  -ms-flex: 1;
+      flex: 1;
+  margin-top: 30px
 }
 
 .ace_editor {
@@ -245,7 +225,6 @@ color: #666;
   border-left: 7px white solid;
   border-bottom: 7px white solid;
   -webkit-transform: rotate(-45deg);
-      -ms-transform: rotate(-45deg);
           transform: rotate(-45deg);
   z-index: 500;
 }
@@ -266,7 +245,6 @@ color: #666;
   -webkit-animation: rota 10s linear;
           animation: rota 10s linear;
   -webkit-transform-origin: 100% 50%;
-      -ms-transform-origin: 100% 50%;
           transform-origin: 100% 50%;
 }
 
@@ -402,17 +380,14 @@ color: #666;
   position: relative;
   padding: 9px;
   -webkit-transform: rotate(0deg);
-      -ms-transform: rotate(0deg);
           transform: rotate(0deg);
-  margin-left: 82px;
 }
 
 .spinner-wrapper-transition {
   -webkit-transform: rotate(180deg);
-      -ms-transform: rotate(180deg);
           transform: rotate(180deg);
-  -webkit-transition: -webkit-transform 0.5s linear;
-          transition: transform 0.5s linear;
+  transition: -webkit-transform 0.5s linear;
+  transition: transform 0.5s linear;
 }
 
 .spinner-circle {
@@ -481,8 +456,7 @@ color: #666;
 /*********************************/
 .tr-webapis-enter {
   background: rgb(255,255,194);
-  -webkit-transition: background 0.2s linear;
-          transition: background 0.2s linear;
+  transition: background 0.2s linear;
 }
 
 .tr-webapis-enter.tr-webapis-enter-active {
@@ -491,8 +465,7 @@ color: #666;
 
 .tr-webapis-leave {
   background: white;
-  -webkit-transition: background 0.01s linear;
-          transition: background 0.01s linear;
+  transition: background 0.01s linear;
 }
 
 .tr-webapis-leave.tr-webapis-leave-active {
@@ -501,8 +474,7 @@ color: #666;
 
 .tr-webapi-spawn {
   background: white;
-  -webkit-transition: background 0.1s linear;
-          transition: background 0.1s linear;
+  transition: background 0.1s linear;
 }
 
 .tr-webapi-spawn.tr-webapi-spawn-active {
@@ -512,8 +484,7 @@ color: #666;
 /*********************************/
 .tr-queue-enter {
   background: rgb(255,255,194);
-  -webkit-transition: background 0.2s linear;
-          transition: background 0.2s linear;
+  transition: background 0.2s linear;
 }
 
 .tr-queue-enter.tr-queue-enter-active {
@@ -522,16 +493,13 @@ color: #666;
 
 .tr-queue-leave {
   -webkit-transform: translate(0, 0);
-      -ms-transform: translate(0, 0);
           transform: translate(0, 0);
   opacity: 1;
-  -webkit-transition: all 0.25s linear;
-          transition: all 0.25s linear;
+  transition: all 0.25s linear;
 }
 
 .tr-queue-leave.tr-queue-leave-active {
   -webkit-transform: translate(0, -100px);
-      -ms-transform: translate(0, -100px);
           transform: translate(0, -100px);
   opacity: 0.01;
 }
@@ -540,42 +508,36 @@ color: #666;
 /*********************************/
 .tr-stack-enter {
   -webkit-transform: translate(0, 0);
-      -ms-transform: translate(0, 0);
           transform: translate(0, 0);
   opacity: 0.01;
-  -webkit-transition: all 0.1s linear;
-          transition: all 0.1s linear;
+  transition: all 0.1s linear;
 }
 
 .tr-stack-enter.stack-item-callback {
   -webkit-transform: translate(0, 100px);
-      -ms-transform: translate(0, 100px);
           transform: translate(0, 100px);
-  -webkit-transition: all 0.25s linear;
-          transition: all 0.25s linear;
+  transition: all 0.25s linear;
 }
 
 .tr-stack-enter.tr-stack-enter-active {
   -webkit-transform: translate(0, 0);
-      -ms-transform: translate(0, 0);
           transform: translate(0, 0);
   opacity: 1;
 }
 
 .tr-stack-leave {
   opacity: 1;
-  -webkit-transition: all 0.1s linear;
-          transition: all 0.1s linear;
+  transition: all 0.1s linear;
 }
 
 .tr-stack-leave.tr-stack-leave-active {
   opacity: 0.01;
-  -webkit-transition: all 0.1s linear;
-          transition: all 0.1s linear;
+  transition: all 0.1s linear;
 }
 
 .htmlEditorBox {
   position: relative;
+  z-index: 999;
 }
 
 .editor-switch {
@@ -591,14 +553,12 @@ color: #666;
 
 .render-queue .callback-delayed {
   background: rgba(255,0,0,0.5);
-  -webkit-transition: background 0.2s linear;
-          transition: background 0.2s linear;
+  transition: background 0.2s linear;
 }
 
 .render-queue .callback-rendered {
   background: rgba(0,255,0,0.5);
-  -webkit-transition: background 0.4s linear;
-          transition: background 0.4s linear;
+  transition: background 0.4s linear;
 }
 
 
@@ -627,8 +587,8 @@ color: #666;
 
 .top-nav {
   background: #D80;
-  padding: 5px;
-  height: 32px;
+  padding: 10px;
+  height: 40px;
   position: absolute;
   width: 100%;
   color: #eee;
@@ -639,7 +599,7 @@ color: #666;
   font-size: 20px;
   display: inline;
   position: relative;
-  top: -2px;
+  top: -3px;
   color: #eee;
 }
 
@@ -648,7 +608,6 @@ color: #666;
   background: none;
   color: #eee;
   font-size: 30px;
-  line-height: 30px;
   margin: 0;
   padding: 0;
   margin-right: 10px;
@@ -657,13 +616,10 @@ color: #666;
 
 .settingsColumn {
   box-sizing: border-box;
-  -webkit-box-flex: 0;
-  -webkit-flex: none;
-      -ms-flex: none;
-          flex: none;
+  -ms-flex: none;
+      flex: none;
   width: 200px;
-  -webkit-transition: width 0.15s linear;
-          transition: width 0.15s linear; 
+  transition: width 0.15s linear; 
   font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
   background: #ddd;
   color: #666;
