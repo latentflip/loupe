@@ -26,7 +26,7 @@ color: #666;
 
 .flexContainer > * {
   height: 100%;
-  padding-top: 32px;
+  padding-top: 40px;
 }
 
 .rowParent, .columnParent{
@@ -101,6 +101,7 @@ color: #666;
   font-size: 12px;
   overflow-y: hidden;
   position: relative;
+  margin-top: 30px;
 }
 
 .editor:before {
@@ -119,6 +120,7 @@ color: #666;
 
 .ace-editor-wrapper {
   flex: 1;
+  margin-top: 30px
 }
 
 .ace_editor {
@@ -356,7 +358,6 @@ color: #666;
   position: relative;
   padding: 9px;
   transform: rotate(0deg);
-  margin-left: 82px;
 }
 
 .spinner-wrapper-transition {
@@ -506,6 +507,7 @@ color: #666;
 
 .htmlEditorBox {
   position: relative;
+  z-index: 999;
 }
 
 .editor-switch {
@@ -555,8 +557,8 @@ color: #666;
 
 .top-nav {
   background: #D80;
-  padding: 5px;
-  height: 32px;
+  padding: 10px;
+  height: 40px;
   position: absolute;
   width: 100%;
   color: #eee;
@@ -567,7 +569,7 @@ color: #666;
   font-size: 20px;
   display: inline;
   position: relative;
-  top: -2px;
+  top: -3px;
   color: #eee;
 }
 
@@ -576,7 +578,6 @@ color: #666;
   background: none;
   color: #eee;
   font-size: 30px;
-  line-height: 30px;
   margin: 0;
   padding: 0;
   margin-right: 10px;
